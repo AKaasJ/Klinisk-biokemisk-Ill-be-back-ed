@@ -26,7 +26,7 @@ End Function
 Function fryserinfo(plateinput, populnr As Integer)
 'får populnr og plateid, outputter resultat som array() hvor 0 er frysernr og 1 er fryserpos
 
-MyFile = "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\384 struktur forsøg med macro.xlsm"
+MyFile = "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\384testmappe.xlsx"
 Application.ScreenUpdating = False
 Workbooks.Open Filename:=MyFile
  
@@ -683,7 +683,7 @@ Dim række As Integer
 række = 3 ' Bestemmer hvilken række vi starter med at undersøge for "Filtype"
 
 ' ændres til stien på P drev
-MyFile = "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\fryser96 øbus 3 test\Sti eksempel.xlsx"
+MyFile = "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\stier.xlsx"
 
 Application.ScreenUpdating = False
 Workbooks.Open Filename:=MyFile
@@ -1107,14 +1107,14 @@ Case "96 plader"
         
         
         'henter de forskellige "indhold"
-        indhold = læserindhold(populnummer, "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\fryser96 øbus 3 test\fryseroversigt3") 'array med alle de forskellige indhold skal nok også bruge sti
+        indhold = læserindhold(populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\fryseroversigt.xlsx") 'array med alle de forskellige indhold skal nok også bruge sti
         
         'henter fryser og max plate information om populnummeret
         For x = LBound(indhold) To (UBound(indhold))
         
             ReDim Preserve fryserogmaxplate(x)
             
-            fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold(x), populnummer, "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\fryser96 øbus 3 test\fryseroversigt3")
+            fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold(x), populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\fryseroversigt.xlsx")
             'output er 1 dimension større
             'fryserogmaxplate(x) er fryserogmaxplate af indhold x
             'fryserogmaxplate(x)(y) er fryser og maxplate af indhold x række y
@@ -1288,14 +1288,14 @@ Case "384 plader"
         Next x
 
         'henter de forskellige "indhold"
-        indhold384 = læserindhold(populnummer, "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\384testdata.xlsx") 'array med alle de forskellige indhold skal nok også bruge sti
+        indhold384 = læserindhold(populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\384testdata.xlsx") 'array med alle de forskellige indhold skal nok også bruge sti
 
         'Henter fryserinformation og maxplate info for alle de "indhold" der er blevet læst
         For x = LBound(indhold384) To (UBound(indhold384))
         
             ReDim Preserve fryserogmaxplate(x)
             
-            fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold384(x), populnummer, "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\384testdata.xlsx")
+            fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold384(x), populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\384testdata.xlsx")
             'output er 1 dimension større
             'fryserogmaxplate(x) er fryserogmaxplate af indhold x
             'fryserogmaxplate(x)(y) er fryser og maxplate af indhold x række y
