@@ -378,67 +378,79 @@ Do While MyFile <> ""
             Set Cellx = .Find("1", LookIn:=xlValues, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext)
             Set Celly = .Find("A", LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlNext)
         End With
-    
-    Cellx = Cellx.Column
-    Celly = Celly.Row
 
-    
-    platerows = 96 / 12
-    platecol = 96 / 8
-    
-    y = 1
-    x = 1
-    
-    'initierer arrayinfo
-    pladeinfo(3) = MyFile             ' Filens navn kan laves til hyperlink vha. stiarray
-    pladeinfo(4) = Cells(22, 3).Value ' PlateID
-    pladeinfo(5) = Cells(24, 3).Value ' Isolationstid
-    pladeinfo(6) = Cells(24, 9).Value ' Instrument
-    
-'    Range("B1:C1").MergeCells = True
-    
-
-        Do Until y = platerows + 1 ' Looper igennem ad x aksen 12 kan evt være variabel så man kan definere om det er 384 eller 96 plate
-            
-            Do Until x = platecol + 1  ' Looper igennem ad y aksen
-                
-               ActiveSheet.Cells(Celly, Cellx).Select
-'I stedet for at skrive data ind i celler her, gem i array som funktion outputter?
-               ReDim Preserve prøvenr(i)
-               ReDim Preserve wellrow(i)
-               ReDim Preserve wellcol(i)
-               prøvenr(i) = Cells(Celly, Cellx).Value
-               wellrow(i) = Chr(64 + y)
-               wellcol(i) = x
-               
-               i = i + 1
-               
-            Cellx = Cellx + 1
-            x = x + 1
-            
-            
-            Loop
+    If Not Cellx Is Nothing Then
         
-        ' Incrementer inden loop køres igen og resetter x så x-akse loopet starter fra 1
+    
+        Cellx = Cellx.Column
+        'MsgBox (Cellx Is Nothing) 'Lader til at virke, hvis cellx er nothing så spring over.
+        Celly = Celly.Row
+    
         
-        Cellx = 2
-        Celly = Celly + 2
+        platerows = 96 / 12
+        platecol = 96 / 8
+        
+        y = 1
         x = 1
-        y = y + 1
-               
-        Loop
-    ReDim Preserve filer(dirloop)
-    pladeinfo(0) = prøvenr()
-    pladeinfo(1) = wellrow()
-    pladeinfo(2) = wellcol()
-    filer(dirloop) = pladeinfo()
+        
+        'initierer arrayinfo
+        pladeinfo(3) = MyFile             ' Filens navn kan laves til hyperlink vha. stiarray
+        pladeinfo(4) = Cells(22, 3).Value ' PlateID
+        pladeinfo(5) = Cells(24, 3).Value ' Isolationstid
+        pladeinfo(6) = Cells(24, 9).Value ' Instrument
+        
+    '    Range("B1:C1").MergeCells = True
+        
     
-'    MsgBox (MyFile)
-     
-    'Lukker det excel ark der er blevet søgt i uden at gemme
-    ActiveWorkbook.Close savechanges:=False
-    Application.ScreenUpdating = True
-    MyFile = Dir 'Dir ændrer MyFile til næste fil i rækken.
+            Do Until y = platerows + 1 ' Looper igennem ad x aksen 12 kan evt være variabel så man kan definere om det er 384 eller 96 plate
+                
+                Do Until x = platecol + 1  ' Looper igennem ad y aksen
+                    
+                   ActiveSheet.Cells(Celly, Cellx).Select
+    'I stedet for at skrive data ind i celler her, gem i array som funktion outputter?
+                   ReDim Preserve prøvenr(i)
+                   ReDim Preserve wellrow(i)
+                   ReDim Preserve wellcol(i)
+                   prøvenr(i) = Cells(Celly, Cellx).Value
+                   wellrow(i) = Chr(64 + y)
+                   wellcol(i) = x
+                   
+                   i = i + 1
+                   
+                Cellx = Cellx + 1
+                x = x + 1
+                
+                
+                Loop
+            
+            ' Incrementer inden loop køres igen og resetter x så x-akse loopet starter fra 1
+            
+            Cellx = 2
+            Celly = Celly + 2
+            x = 1
+            y = y + 1
+                   
+            Loop
+        ReDim Preserve filer(dirloop)
+        pladeinfo(0) = prøvenr()
+        pladeinfo(1) = wellrow()
+        pladeinfo(2) = wellcol()
+        filer(dirloop) = pladeinfo()
+        
+    '    MsgBox (MyFile)
+         
+        'Lukker det excel ark der er blevet søgt i uden at gemme
+        ActiveWorkbook.Close savechanges:=False
+        Application.ScreenUpdating = True
+        MyFile = Dir 'Dir ændrer MyFile til næste fil i rækken.
+
+    Else
+    
+        ActiveWorkbook.Close savechanges:=False
+        Application.ScreenUpdating = True
+        MyFile = Dir 'Dir ændrer MyFile til næste fil i rækken.
+        
+    End If
 
 Loop
 
@@ -1046,6 +1058,7 @@ Case "96 plader"
             
             For n = LBound(plates) To UBound(plates) 'looper igennem filer i den sti
             i = firstrowofpath - 2
+'****************   BUGBUGBUGBUGBUG     ********************************
                 For i = LBound(plates(n)(0)) To UBound(plates(n)(0)) 'looper igennem værdier hentet fra hver fil
                     ReDim Preserve ID(y)
                     ReDim Preserve wellrows(y)
