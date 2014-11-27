@@ -1,0 +1,1435 @@
+Function fryserinfo(plateinput, populnr As Integer)
+'får populnr og plateid, outputter resultat som array() hvor 0 er frysernr og 1 er fryserpos
+
+MyFile = "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\384 struktur forsøg med macro.xlsm"
+Application.ScreenUpdating = False
+Workbooks.Open Filename:=MyFile
+ 
+'initierer data typer og arrays
+Dim række As Integer
+Dim plateidstr As String
+Dim plateidint As Integer
+Dim resultat(2) ' resultat skal måske kun være (1) da række ikke er vigtig senere
+Dim intArray()
+Dim intcase(1)
+Dim stringarray()
+Dim stringcase(1)
+
+'initierer variable
+arraytest = dynamiskplateIDogrække(populnr)
+plateid = plateinput
+række = 0 'initierer række = 0 (måske ikke vigtig)
+plateidstr = "test" ' find finere løsning
+
+y = 0
+Z = 0
+
+'Laver 2 arrays, et med alle tal og et med alle strings
+For x = LBound(arraytest) To UBound(arraytest) ' skal være dowhile?
+    ReDim Preserve intArray(y)
+    ReDim Preserve stringarray(Z)
+
+    If IsNumeric(arraytest(x)(0)) Then
+
+        intcase(0) = arraytest(x)(0)
+        intcase(1) = arraytest(x)(1)
+        intArray(y) = intcase
+        y = y + 1
+
+
+    Else
+
+        stringcase(0) = arraytest(x)(0)
+        stringcase(1) = arraytest(x)(1)
+        stringarray(Z) = stringcase
+        Z = Z + 1
+    
+    End If
+    
+Next x
+
+'tester om plateID er tal eller ej og kommer den ind i passende variabel
+If IsNumeric(plateid) Then
+    plateidint = plateid
+Else
+    plateidstr = plateid
+End If
+
+' tester om plateID findes i arrayet
+For x = LBound(arraytest) To UBound(arraytest)
+
+    'hvis arrayet = plateid (string)
+    If arraytest(x)(0) = plateid Then
+        række = arraytest(x)(1)
+        
+        resultat(0) = Cells(række, 3).Value
+        resultat(1) = Cells(række, 4).Value
+    Else
+    
+    'do nothing
+    
+    End If
+    
+    
+Next x
+' sætter y lig 0 inden loop
+y = 0
+'hvis række stadig er 0 må plateID være et tal og skal behandles som så. (da plateID kan være mindre end de tal der står i dokumentet)
+    If række = 0 Then
+    
+    ' så længe plateID er større end arraytest(y)(0) så gør y større
+        Do While plateidint > intArray(y)(0) ' fejl ved plateid(max)
+    
+            y = y + 1
+    
+        Loop
+    
+    række = intArray(y)(1)
+    
+    resultat(0) = Cells(række, 3).Value 'frysernr
+    resultat(1) = Cells(række, 4).Value 'fryserposition
+    
+    End If
+
+fryserinfo = resultat()
+
+    ActiveWorkbook.Close savechanges:=False
+    Application.ScreenUpdating = True
+
+End Function
+Function dynamiskplateIDogrække(populnr As Integer) ' skal ende med at tage populnr som input
+
+startrække = tællerrækker384(populnr)(0)
+størrelseafarray = tællerrækker384(populnr)(1) - startrække
+Dim array1(1)
+Dim dynamiskarray()
+ReDim dynamiskarray(0 To størrelseafarray)
+'arrayet skal have x elementer hvor x = tællerrækker384(1)-tællerrækker384(0)
+
+
+
+
+' for loop fylder det dynamiske array op med arrays der indeholder plateID og frysernr
+For x = 0 To størrelseafarray
+
+    array1(1) = startrække + x
+    array1(0) = Cells(array1(1), 6).Value
+    
+    dynamiskarray(x) = array1()
+
+Next x
+
+
+
+dynamiskplateIDogrække = dynamiskarray()
+
+
+End Function
+Function tællerrækker384(populnr As Integer) ' skal også indeholde kolonne?
+'tæller det antal rækker i 384 oversigten som en popul opstår i (det antal rækker der skal loopes)
+'output er et array med 2 elementer (0) = første række med popul i. (1) er antal rækker som der findes med populen.
+'bruges i funktionen dynamiskplateIDogrække
+
+
+Dim rækker(1)
+'error handler, hvis den ikke finder populnr
+
+Columns("B:B").Select
+Set cell = Selection.Find(What:=populnr)
+
+rækker(0) = cell.Row 'første række af populen
+
+Do While Cells(rækker(0) + i, 2) = populnr
+
+    i = i + 1
+
+Loop
+
+rækker(1) = i + rækker(0) - 1
+
+'output = array med første element = første række med populen i,
+'andet element = sidste række med populen i.
+tællerrækker384 = rækker()
+
+End Function
+
+Sub SimpelTest(Plate As Integer, Path, i96)
+
+Dim MyFile As String 'Navn på fil (ændres senere)
+Dim i As Integer
+i = i96
+
+ 
+' Den mappe hvor filerne skal findes, og de filer der skal ledes efter (alle der slutter med .xls*)
+
+MyFile = Dir(Path & "*.xls?")
+
+' Laver overskrifter i dokumentet (til informationen vi henter)
+    With ThisWorkbook.ActiveSheet.Cells(1, 1)
+        .Value = "ID"
+        .Offset(0, 1).Value = "Well"
+        .Offset(0, 3).Value = "Filnavn + link til fil"
+        .Offset(0, 4).Value = "PlateID"
+        .Offset(0, 5).Value = "Isolationstid"
+        .Offset(0, 6).Value = "Instrument til isolation"
+    End With
+    
+'Looper igennem alle filer indtil alle er loopet igennem.
+EtLoop:
+Do While MyFile <> ""
+    'Definerer variable.
+    Dim Page$, MySheet$
+    
+    'Bruger nuværende ark til at gemme data i som der søges efter
+    MySheet = ActiveSheet.Name
+    
+    'Hopper til ErrorHandler ved en fejl.
+'     On Error GoTo ErrorHandler
+    
+    'Slår screen updating fra (så man ikke ser filen blive åbnet) og åbner workbook (næste fil)
+    Application.ScreenUpdating = False
+    Workbooks.Open Filename:=Path & MyFile
+    
+        With Worksheets(1).Range("a1:G70")
+            Set Cellx = .Find("1", LookIn:=xlValues, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext)
+            Set Celly = .Find("A", LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlNext)
+        End With
+    Cellx = Cellx.Column
+    Celly = Celly.Row
+    'MsgBox (Cellx & " : " & Celly)
+    ' Initialiserer konstanter til loops
+    'Cellx = 2
+    'Celly = 5 'koordinater på det første ID (A1)
+    
+    Platesize = Plate
+    platerows = Platesize / 12
+    platecol = Platesize / 8
+    
+    y = 1
+    x = 1
+    
+
+
+    
+    Range("B1:C1").MergeCells = True
+    
+
+        Do Until y = platerows + 1 ' Looper igennem ad x aksen 12 kan evt være variabel så man kan definere om det er 384 eller 96 plate
+            
+            Do Until x = platecol + 1  ' Looper igennem ad y aksen
+            
+               ActiveSheet.Cells(Celly, Cellx).Select
+               
+               
+               'Skriver data ind i det excel ark som der søges fra
+               With ThisWorkbook.ActiveSheet.Cells(i, 1) ' redigeret
+                   .Value = Cells(Celly, Cellx).Value ' redigeret
+                   .Offset(0, 1).Value = Chr(64 + y) ' Finder x position på ID i plate (Well)
+                   .Offset(0, 2).Value = x ' Finder y position på ID i plate (Well)
+                   .Interior.ColorIndex = Cells(Celly, Cellx).Interior.ColorIndex
+                   'Skriver filnavn ind og laver et hyperlink til det.
+                   .Hyperlinks.Add Anchor:=.Offset(0, 3), _
+                        Address:=Path + MyFile, _
+                        TextToDisplay:=MyFile
+                
+                   .Offset(0, 4).Value = Cells(22, 3).Value ' PlateID
+                   .Offset(0, 5).Value = Cells(24, 3).Value ' Isolationstid
+                   .Offset(0, 6).Value = Cells(24, 9).Value ' Instrument
+                   
+                   ' Fitter kolonner
+                   .Columns.AutoFit
+                   .Offset(0, 1).Columns.AutoFit
+                   .Offset(0, 3).Columns.AutoFit
+                   .Offset(0, 4).Columns.AutoFit
+                   .Offset(0, 5).Columns.AutoFit
+               End With
+               
+            ' Incrementer inden loop køres igen
+               
+
+            Cellx = Cellx + 1
+            x = x + 1
+            i = i + 1
+            
+            Loop
+        
+        ' Incrementer inden loop køres igen og resetter x så x-akse loopet starter fra 1
+        
+        Cellx = 2
+        Celly = Celly + 2
+        x = 1
+        y = y + 1
+               
+        Loop
+        
+    'Lukker det excel ark der er blevet søgt i uden at gemme
+    ActiveWorkbook.Close savechanges:=False
+    Application.ScreenUpdating = True
+    MyFile = Dir 'Dir ændrer MyFile til næste fil i rækken.
+
+Loop
+
+    
+    
+'Error Handling afsnit. (Overflødigt?)
+ErrorHandler:
+Select Case Err.Number
+        'Common error #1: Stien eller navnet på filen er forkert.
+        ' Fejlen opstår hvis man bruger macroen på et dokument man har åbent. (kan fixes?)
+        Case 1004
+            Range("D10:E11").ClearContents
+            Application.ScreenUpdating = True
+            MsgBox "The workbook " & MyFile & " could not be found in the path" & vbCrLf & MyFolder & "."
+            MyFile = Dir() ' indsat ny
+        Resume EtLoop ' ny
+'        Exit Sub ' ny
+        
+        'Common error #2: Det der søges på findes ikke i dokumentet.
+        Case 9, 91
+            ThisWorkbook.ActiveSheet.Cells(Celly, Cellx).Offset(0, 1).Value = "Not Found"
+   '         ThisWorkbook.Sheets(MySheet).Range("D10:E11").ClearContents
+            Workbooks(MyFile).Close False
+            Application.ScreenUpdating = False
+            MsgBox "The value " & Txt & " was not found in The workbook " & MyFile & " in the path" & vbCrLf & MyFolder & "."
+            MyFile = Dir ' indsat
+        Resume EtLoop ' Resume lader til at lade én "returne" til loopet fra før
+ '       Exit Sub ' Et problem hvis sidste fil ikke har søgeordet i sig?
+        
+        'General case: Slår screenupdating til og slutter macro (så dukker fejlbeskeden op).
+        Case Else
+            Application.ScreenUpdating = True
+        Exit Sub
+End Select
+End Sub
+Function læs384(Path, i96)
+
+Dim MyFile As String 'Navn på fil (ændres senere)
+Dim i As Long
+
+'Cells(3, 3).Value = Time
+MyFile = Dir(Path & "*.xls?")
+i = i96
+
+With ThisWorkbook.ActiveSheet.Cells(1, 1)
+        .Value = "ID"
+        .Offset(0, 1).Value = "PlateID"
+        .Offset(0, 2).Value = "Filnavn + link til fil"
+End With
+
+Do While MyFile <> ""
+    'Definerer variable.
+    Dim Page$, MySheet$
+    
+    'Bruger nuværende ark til at gemme data i som der søges efter
+    MySheet = ActiveSheet.Name
+
+    
+    'Slår screen updating fra (så man ikke ser filen blive åbnet) og åbner workbook (næste fil)
+    Application.ScreenUpdating = False
+    Workbooks.Open Filename:=Path & MyFile
+    plateid = Cells(1, 1).Value
+    ' Initialiserer konstanter til loops
+    Cellx = 2
+    Celly = 5 'koordinater på det første ID (A1)
+
+    platerows = 24
+    platecol = 16
+    
+    y = 1
+    x = 1
+    
+        Do Until y = platecol + 1 ' Looper igennem ad x (Columns) aksen 12 kan evt være variabel så man kan definere om det er 384 eller 96 plate
+          
+            Do Until x = platerows + 1  ' Looper igennem ad y (Rows) aksen
+        
+                ActiveSheet.Cells(Celly, Cellx).Select
+        
+                'skriver ind i dette ark
+                With ThisWorkbook.ActiveSheet.Cells(i, 1)
+                    .Value = Cells(Celly, Cellx).Value
+                    .Offset(0, 1).Value = plateid
+                    .Hyperlinks.Add Anchor:=.Offset(0, 2), _
+                        Address:=Path + MyFile, _
+                        TextToDisplay:=MyFile
+                End With
+            
+            Cellx = Cellx + 1
+            x = x + 1
+            i = i + 1
+            
+            Loop
+            
+        Cellx = 2
+        Celly = Celly + 1
+        x = 1
+        y = y + 1
+               
+        Loop
+        
+ActiveWorkbook.Close savechanges:=False
+Application.ScreenUpdating = True
+MyFile = Dir 'Dir ændrer MyFile til næste fil i rækken.
+
+Loop
+læs384 = i - 1
+'Cells(3, 4).Value = Time
+    
+
+End Function
+
+
+Function koncentration2(Path, i) 'i = 2 + længden af filen (antallet af målinger i konc filen (kræver script + array?)
+'skriver data fra koncentration filer i en mappe ind i et excel ark,
+'outputter et heltal som er antallet af rækker i alle de filer der er skrevet ind i dokumentet
+
+Dim x As Integer
+Dim y As Integer
+
+MyFile = Dir(Path & "*.xls?")
+'bedere kendt som i96 i den anden sub
+
+    ' Laver overskrifter
+    With ThisWorkbook.ActiveSheet.Cells(1, 1)
+        .Value = "Plate ID"
+        .Offset(0, 1).Value = "Well"
+        .Offset(0, 2).Value = "Sample ID"
+        .Offset(0, 3).Value = "User ID"
+        .Offset(0, 4).Value = "Date"
+        .Offset(0, 5).Value = "Time"
+        .Offset(0, 6).Value = "Conc."
+        .Offset(0, 7).Value = "Units"
+        .Offset(0, 8).Value = "A260"
+        .Offset(0, 9).Value = "A280"
+        .Offset(0, 10).Value = "260/280"
+        .Offset(0, 11).Value = "260/230"
+        .Offset(0, 12).Value = "Conc. Factor (ng/ul)"
+        .Offset(0, 13).Value = "Cursor Pos."
+        .Offset(0, 14).Value = "Cursor abs."
+        .Offset(0, 15).Value = "340 raw"
+        .Offset(0, 16).Value = "NA Type"
+    End With
+y = 2
+
+
+Do While MyFile <> ""
+
+    Application.ScreenUpdating = False
+    Workbooks.Open Filename:=Path & MyFile
+    
+        'Looper igennem data så længe der står noget den nuværende celle i kolonne 1
+        Do While Not IsEmpty(Cells(y, 1))
+        
+            'Henter Data (17 kolonner)
+           With ThisWorkbook.ActiveSheet.Cells(i, 1)
+                '.Value = Cells(y, 1).Value
+                
+                .Hyperlinks.Add Anchor:=.Offset(0, 0), _
+                        Address:=Path + MyFile, _
+                        TextToDisplay:=MyFile
+                
+                
+                
+                .Offset(0, 1).Value = Cells(y, 1).Offset(0, 1)
+                .Offset(0, 2).Value = Cells(y, 1).Offset(0, 2)
+                .Offset(0, 3).Value = Cells(y, 1).Offset(0, 3)
+                .Offset(0, 4).Value = Cells(y, 1).Offset(0, 4)
+                .Offset(0, 5).Value = Cells(y, 1).Offset(0, 5)
+                
+                .Offset(0, 6).Value = Cells(y, 1).Offset(0, 6)
+                .Offset(0, 7).Value = Cells(y, 1).Offset(0, 7)
+                .Offset(0, 8).Value = Cells(y, 1).Offset(0, 8)
+                .Offset(0, 9).Value = Cells(y, 1).Offset(0, 9)
+                .Offset(0, 10).Value = Cells(y, 1).Offset(0, 10)
+                .Offset(0, 11).Value = Cells(y, 1).Offset(0, 11)
+                .Offset(0, 12).Value = Cells(y, 1).Offset(0, 12)
+                .Offset(0, 13).Value = Cells(y, 1).Offset(0, 13)
+                .Offset(0, 14).Value = Cells(y, 1).Offset(0, 14)
+                .Offset(0, 15).Value = Cells(y, 1).Offset(0, 15)
+                .Offset(0, 16).Value = Cells(y, 1).Offset(0, 16)
+                
+                .Offset(0, 4).NumberFormat = "d-m-yyyy"
+                .Offset(0, 5).NumberFormat = "hh:mm:ss"
+                .Columns.AutoFit
+           End With
+           
+           y = y + 1
+           i = i + 1
+        
+        Loop
+    y = 2
+    ActiveWorkbook.Close savechanges:=False
+    Application.ScreenUpdating = True
+    
+    MyFile = Dir
+Loop
+
+koncentration2 = i - 1
+
+End Function
+
+Function Tælrækker(FilePath)
+'Tæller antallet af rækker i kolonne 1 i et dokument (tæller også øverste række med (overskrifter))
+'(så træk 1 til fra) antallet af rækker er output som int
+MyFile = FilePath
+Count = 1
+
+Application.ScreenUpdating = False
+Workbooks.Open Filename:=MyFile
+
+Do While Not IsEmpty(Cells(Count, 1))
+
+    Count = Count + 1
+    
+Loop
+
+Tælrækker = Count - 1 ' trækker den tomme celle fra
+
+ActiveWorkbook.Close savechanges:=False
+Application.ScreenUpdating = True
+
+End Function
+Function tællerfiler(Pathin)
+'Tæller antallet af filer en mappe, antallet af filer er output i integer
+Filename = Dir(Pathin & "*.xls?")
+
+Do While Filename <> ""
+    Count = Count + 1
+    Filename = Dir()
+Loop
+
+tællerfiler = Count 'outputter antallet af filer i en mappe
+
+End Function
+
+Private Function stierfunction(Filtype As String, kolonnenr As Integer)
+
+' skal gemme flere værdier fra et andet dokument i et array. (i første omgang 1 værdi i en variabel)
+Dim MyFile As String
+Dim Stier()
+Dim række As Integer
+række = 3 ' Bestemmer hvilken række vi starter med at undersøge for "Filtype"
+
+' ændres til stien på P drev
+MyFile = "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\fryser96 øbus 3 test\Sti eksempel.xlsx"
+
+Application.ScreenUpdating = False
+Workbooks.Open Filename:=MyFile
+i = -1
+' looper igennem kolonne 1 til den når en celle der er tom (skal også bruges i konc algo)
+    Do Until ActiveSheet.Cells(i + række, 1).Value = "" ' her ligger fejlen? hvis vi starter med en tom celle stopper algoritmen
+    i = i + 1
+        ReDim Preserve Stier(y)
+        
+        ' if søger efter "Filtype" i en string og gør... hvis den indeholder den
+            If InStr(ActiveSheet.Cells(i + række, 1), Filtype) Then
+            
+                If ActiveSheet.Cells(i + række, kolonnenr).Value = "" Then
+                    'do nothing
+                Else
+                
+            
+           ' tilføjer stien i række kolonne 2 ud fra den string der indeholdt 96 før til stier array.
+                   Stier(y) = ActiveSheet.Cells(i + række, kolonnenr).Value
+            'ThisWorkbook.ActiveSheet.Cells(y + 1, 1).Value = Stier(y) ' fjernes
+                   y = y + 1
+                
+                End If
+                
+                
+            Else
+            
+            'Hvis kolonnen ikke indeholder "Filtype" bliver sidste element i Stier(y) slettet
+            '    ReDim Preserve Stier(UBound(Stier) - 1)
+            ' Do nothing...
+            
+            End If
+
+        
+    
+    Loop
+
+If IsEmpty(Stier(UBound(Stier))) Then
+ReDim Preserve Stier(UBound(Stier) - 1)
+End If
+
+
+
+ActiveWorkbook.Close savechanges:=False
+Application.ScreenUpdating = True
+
+stierfunction = Stier()
+
+
+
+End Function
+Public Function InsertionSortElevator(ByRef pvarArray As Variant)
+    Dim i As Long
+    Dim j As Long
+    Dim iMin As Long
+    Dim iMax As Long
+    'Dim pvarArray2()
+    Dim varSwap As Variant
+    'Dim finalarray() As Integer
+    
+    iMin = LBound(pvarArray) + 1
+    iMax = UBound(pvarArray)
+    For i = iMin To iMax
+        varSwap = pvarArray(i)
+        For j = i To iMin Step -1
+            If varSwap(0) < pvarArray(j - 1)(0) Then pvarArray(j) = pvarArray(j - 1) Else Exit For
+        Next j
+        pvarArray(j) = varSwap
+    Next i
+    
+    'For x = LBound(pvarArray) To UBound(pvarArray)
+    'ReDim Preserve pvarArray2(x)
+    'pvarArray2(x) = CInt(pvarArray(x))
+    'Next x
+    
+    
+'finalarray() = pvarArray
+    
+InsertionSortElevator = pvarArray
+End Function
+Function elevatorposogmaxIDallefiler(Path)
+Dim MyFile As String 'Navn på fil (ændres senere)
+Dim elevatorpos()
+Dim elenrogmaxID(1)
+Dim maxID() As Integer
+Dim elevatoroversigt()
+Dim finalarray()
+'Dim sortedarray()
+
+MyFile = Dir(Path & "*.xls?")
+i = 0
+Do While MyFile <> ""
+    'Definerer variable.
+    Dim Page$, MySheet$
+    
+    MySheet = ActiveSheet.Name
+
+    Application.ScreenUpdating = False
+    Workbooks.Open Filename:=Path & MyFile
+
+
+        'Finder elevatorpositioner (byt ud med funktion?)
+        x = 0
+        
+        With Worksheets(1).Range("a1:G70")
+            Set C = .Find("elevator nr", LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlNext)
+            If Not C Is Nothing Then
+                firstaddress = C.Address
+                Do
+                
+                    ReDim Preserve elevatorpos(x)
+                    
+                    elevatorpos(x) = C.Address
+                    x = x + 1
+                    
+                    Set C = .FindNext(C)
+                    
+                Loop While Not C Is Nothing And C.Address <> firstaddress
+            End If
+        End With
+        
+        
+        'looper igennem alle elevatorer og laver et array med elevatorID og maxIDs i alle elevatorer
+        For x = LBound(elevatorpos) To UBound(elevatorpos)
+            'ReDim Preserve finalarray(x)
+            ReDim Preserve finalarray(i)
+            'finder række og kolonne på elevatorpos
+            elevatorrow = Range(elevatorpos(x)).Row
+            elevatorcolumn = Range(elevatorpos(x)).Column
+            
+            'Cells(elevatorrow + y + 1, elevatorcolumn + 1).Select
+            
+            
+            'loop der finder alle maxID i elevatoren
+            y = 0
+            Do Until Cells(elevatorrow + y + 1, elevatorcolumn + 1) = ""
+                ReDim Preserve maxID(y)
+                'split ID
+                
+                If Not Cells(elevatorrow + y + 1, elevatorcolumn + 1).Value = "" Then
+        
+                    ID = Split(Cells(elevatorrow + y + 1, elevatorcolumn + 1).Value, "-")
+                    maxID(y) = CInt(ID(1))
+                    
+                    
+                End If
+                y = y + 1
+            Loop
+        
+            'splitter elevatorens navn så kun ID kommer ud (f.eks. elevator nr. 1 = 1)
+            mitsplit = Split(Range(elevatorpos(x)).Value, "nr. ")
+            
+            'laver et array der indeholder elevator ID og maxID
+            elenrogmaxID(0) = mitsplit(1)
+            elenrogmaxID(1) = maxID()
+            finalarray(i) = elenrogmaxID()
+            i = i + 1
+        
+        Next x
+
+    'Lukker det excel ark der er blevet søgt i uden at gemme
+    ActiveWorkbook.Close savechanges:=False
+    Application.ScreenUpdating = True
+    MyFile = Dir 'Dir ændrer MyFile til næste fil i rækken.
+
+Loop
+
+elevatorposogmaxIDallefiler = finalarray()
+End Function
+
+
+Sub Functionmedsubogfunc()
+
+' Looper igennem venstre side indtil der er en tom celle.
+
+'initierer datatyper
+Dim DeFilerDerTestes As String
+Dim KolonneDerTestes As Integer
+Dim i96 As Integer
+Dim fryser(1)
+i96 = 2
+Dim populnummer As Integer
+Dim intplatessorted()
+Dim fryserogmaxplate()
+Dim sortedarray()
+
+'kolonnedertestes bruges i stioversigten, afhænger af hvilken popul der er valgt
+KolonneDerTestes = 2 + ComboBox1.ListIndex 'trækker en fra fordi listindex starter ved 1
+' Laver array med stier ud af sti oversigt
+'Stiarray = stierfunction(DeFilerDerTestes, KolonneDerTestes) ' array der de stier der skal testes filer i
+populnummer = Split(ComboBox1, "-")(0)
+'Opretter worksheet (navn skal ændres på baggrund af input
+Worksheets.Add(After:=Worksheets(1)).Name = "BioPac96"
+
+' tester om stiarray er tomt.
+
+
+
+
+'Finder ud af hvad der står i data dropdown menuen
+Select Case ComboBox2.Value
+
+'**************************************************************************************
+
+Case "Koncentrationer"
+
+    'Genererer Array med stier der skal loopes igennem
+    DeFilerDerTestes = konc
+    stiarray = stierfunction(DeFilerDerTestes, KolonneDerTestes)
+
+    'tester om arrayet er tomt:
+    If Len(Join(stiarray, "")) = 0 Then
+        
+    'Hvis array er tomt:
+        MsgBox ("der er ikke noget data om denne population")
+        Application.DisplayAlerts = False
+        ThisWorkbook.Sheets("BioPac96").Delete
+        Application.DisplayAlerts = True
+        GoTo TomPopul
+        
+    Else
+    'Hvis array ikke er tomt, kører koden:
+
+    
+        For x = LBound(stiarray) To UBound(stiarray) ' konc
+    
+            Count = koncentration2(stiarray(x), i96) ' virker når i = i96, ved ikke hvad der itererer i96
+            
+        Next x
+        
+    End If
+    
+'**************************************************************************************
+    
+Case "96 plader"
+
+    'Genererer Array med stier der skal loopes igennem
+    DeFilerDerTestes = 96
+    stiarray = stierfunction(DeFilerDerTestes, KolonneDerTestes)
+    
+    'tester om arrayet er tomt:
+    If Len(Join(stiarray, "")) = 0 Then
+        
+    'Hvis array er tomt:
+        MsgBox ("der er ikke noget data om denne population")
+        Application.DisplayAlerts = False
+        ThisWorkbook.Sheets("BioPac96").Delete
+        Application.DisplayAlerts = True
+        GoTo TomPopul
+        
+    Else
+    'Hvis array ikke er tomt, kører koden:
+
+        For x = LBound(stiarray) To UBound(stiarray)
+        
+            Call SimpelTest(96, stiarray(x), i96)       'Looper igennem excelfiler i mappen, skriver data i excel
+            i96 = i96 + (tællerfiler(stiarray(x)) * 96) 'bestemmer hvor i excelarket data inputtes. (hvor langt nede)
+        
+        Next x
+        'henter de forskellige "indhold"
+        indhold = læserindhold(populnummer, "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\fryser96 øbus 3 test\fryseroversigt3") 'array med alle de forskellige indhold skal nok også bruge sti
+        
+        'henter fryser og max plate information om populnummeret
+        For x = LBound(indhold) To (UBound(indhold))
+        
+            ReDim Preserve fryserogmaxplate(x)
+            
+            fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold(x), populnummer, "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\fryser96 øbus 3 test\fryseroversigt3")
+            'output er 1 dimension større
+            'fryserogmaxplate(x) er fryserogmaxplate af indhold x
+            'fryserogmaxplate(x)(y) er fryser og maxplate af indhold x række y
+            'fryserogmaxplate(x)(y)(z) er fryser og maxplate af indhold x række y hvor z er informationen om fryser og maxplate
+            'fryserogmaxplate(x)(y)(0)=frysernr for række y, indhold x. (1)=fryserposition, (2)=maxplateID (det højeste plade ID der findes i den fryser)
+            
+        Next x
+        
+        'skriver overskrifter ind
+        For x = LBound(indhold) To UBound(indhold)
+            Cells(1, 9 + (x * 3)).Value = "Frysernr"
+            Cells(1, 10 + (x * 3)).Value = "Fryserposition"
+            Cells(1, 11 + (x * 3)).Value = "Indhold"
+        Next x
+        
+        'Henter elevatorinfo og bearbejder
+        
+        elevatorarray = stierfunction("Elevator", KolonneDerTestes)
+        
+        'MsgBox (elevatorarray(0) & " : ") '& Size(elevatorarray()))
+        'Laver et array for alle filer i én bestemt mappe (skal udbygges så elevatorer har en plads i sti arket.
+        Elevatorinfo = elevatorposogmaxIDallefiler(elevatorarray(0))
+        Dim allemaxplateID() As Integer
+        Dim alleelevatorID()
+        Dim joinarr(1)
+        Dim Elevatorjoined()
+
+
+        'laver elevatorinfo om til 2 arrays, et med elevatorID og et med maxplateID, laves for at fjerne 1 dimension
+        i = 0
+        For x = LBound(Elevatorinfo) To UBound(Elevatorinfo)
+            længde = UBound(Elevatorinfo(x)(1))
+            
+            For y = 0 To længde
+                ReDim Preserve allemaxplateID(i) 'resetter ved hver loop, y skal være noget andet
+                ReDim Preserve alleelevatorID(i)
+                alleelevatorID(i) = Elevatorinfo(x)(0)
+                allemaxplateID(i) = Elevatorinfo(x)(1)(y)
+                
+                i = i + 1
+            Next y
+        
+        Next x
+        'samler arrays
+        For x = LBound(alleelevatorID) To UBound(alleelevatorID)
+            ReDim Preserve Elevatorjoined(x)
+            joinarr(1) = alleelevatorID(x)
+            joinarr(0) = allemaxplateID(x)
+            Elevatorjoined(x) = joinarr
+        Next x
+        'Sorterer array
+        sortedelevatorinfo = InsertionSortElevator(Elevatorjoined)
+        
+        'Løber alle celler igennem, hvis Sortedelevatorinfo(x)(1) er mindre end ID så indtasted info
+        'For x = LBound(Sortedelevatorinfo) To UBound(Sortedelevatorinfo)
+        'hvis Sortedelevatorinfo er mindre end Cells(2+i,1) så
+        'indtast info + exit for
+        
+        'While Well ikke er tom (fordi ID godt kan være tom)
+        i = 0
+        Do Until Cells(2 + i, 2).Value = ""
+
+        
+            x = 0
+
+            
+        
+
+            For x = LBound(sortedelevatorinfo) To UBound(sortedelevatorinfo)
+            'Cells(2 + i, 2).Select
+                If sortedelevatorinfo(x)(0) > Cells(2 + i, 1).Value Then
+                
+                    Cells(2 + i, 8).Value = sortedelevatorinfo(x)(1)
+                Exit For
+                'Else
+                
+                End If
+
+                        'Cells(2 + i, 9 + (x * 3)).Value = "Indhold"
+            Next x
+            
+        
+        i = i + 1
+        Loop
+        
+        'Cells(2, 10).value = fryserogmaxplate(0)(0)(2)
+        
+        'nu når alle elevator ID er på plads kan man loope igennem fryserinfo og se for hver celle om værdien er mindre etc.
+       
+        For x = LBound(fryserogmaxplate) To UBound(fryserogmaxplate)
+        i = 0
+            Do While Cells(2 + i, 2) <> ""
+                y = 0
+            
+                    ' så længe plateID er større end arraytest(y)(0) så gør y større
+                        Do While Cells(2 + i, 8).Value > fryserogmaxplate(x)(y)(2) And y < UBound(fryserogmaxplate(x)) ' fejl ved plateid(max)
+                    
+                        y = y + 1
+    
+                        Loop 'hopper ud af loop når intplates er større end Cells(2+i,2)
+                        
+                        If Cells(2 + i, 8).Value < fryserogmaxplate(x)(y)(2) And Cells(2 + i, 8).Value >= fryserogmaxplate(x)(y)(3) Then
+                        'indsætter information om frysere når plateID er mindre end intplates(x)(y)(2)
+                            
+                                Cells(2 + i, 9 + (x * 3)).Value = fryserogmaxplate(x)(y)(0)
+                                Cells(2 + i, 10 + (x * 3)).Value = fryserogmaxplate(x)(y)(1)
+                                Cells(2 + i, 11 + (x * 3)).Value = indhold(x)
+                            
+                            i = i + 1
+                        Else
+                            i = i + 1
+                        End If
+                
+                
+            Loop
+       Next x
+        
+    
+    
+    
+    
+        
+    End If
+ 
+ 
+'**************************************************************************************
+ 
+Case "384 plader"
+
+    DeFilerDerTestes = 384
+    stiarray = stierfunction(DeFilerDerTestes, KolonneDerTestes)
+    
+    'tester om arrayet er tomt:
+    If Len(Join(stiarray, "")) = 0 Then
+        
+    'Hvis array er tomt:
+        MsgBox ("der er ikke noget data om denne population")
+        Application.DisplayAlerts = False
+        ThisWorkbook.Sheets("BioPac96").Delete
+        Application.DisplayAlerts = True
+        GoTo TomPopul
+        
+    Else
+    'Hvis array ikke er tomt, kører koden:
+
+        MsgBox (UBound(stiarray))
+        'henter stier og skriver data ind i excel fil
+        For x = LBound(stiarray) To UBound(stiarray) '96 plate
+        
+            Count = læs384(stiarray(x), i96)       'Looper igennem excelfiler i mappen, skriver data i excel
+            i96 = Count 'bestemmer hvor i excelarket data inputtes. (hvor langt nede)
+        
+        Next x
+
+        'henter de forskellige "indhold"
+        indhold384 = læserindhold(populnummer, "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\384testdata.xlsx") 'array med alle de forskellige indhold skal nok også bruge sti
+
+        'Henter fryserinformation og maxplate info for alle de "indhold" der er blevet læst
+        For x = LBound(indhold384) To (UBound(indhold384))
+        
+            ReDim Preserve fryserogmaxplate(x)
+            
+            fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold384(x), populnummer, "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\384testdata.xlsx")
+            'output er 1 dimension større
+            'fryserogmaxplate(x) er fryserogmaxplate af indhold x
+            'fryserogmaxplate(x)(y) er fryser og maxplate af indhold x række y
+            'fryserogmaxplate(x)(y)(z) er fryser og maxplate af indhold x række y hvor z er informationen om fryser og maxplate
+            'fryserogmaxplate(x)(y)(0)=frysernr for række y, indhold x. (1)=fryserposition, (2)=maxplateID (det højeste plade ID der findes i den fryser)
+            
+        Next x
+        
+
+        'Deler arrayet op i et array kun med numeriske maxplate værdier og et kun med maxplate værdier bestående af strings
+        intogstr = delerarrayopinumericognot(fryserogmaxplate) ' laves om så den giver binært output igen, og køres 2 gange (holder dimensionaliteten nede) 'måske?
+
+
+        'holder dimensionerne nede
+        intplates = intogstr(0)
+        strplates = intogstr(1)
+
+        
+
+        'Skriver overskrifter ind
+        For x = LBound(indhold384) To UBound(indhold384)
+            Cells(1, 4 + (x * 3)).Value = "Frysernr"
+            Cells(1, 5 + (x * 3)).Value = "Fryserposition"
+            Cells(1, 6 + (x * 3)).Value = "Indhold"
+        Next x
+        
+
+
+        
+        
+        'indsætter værdier for plates med integers som plateID
+        For x = LBound(intplates) To UBound(intplates)
+        i = 0 'starter fra bunden med den nye x
+
+            Do While Cells(2 + i, 2) <> ""
+            y = 0
+        
+                ' så længe plateID er større end arraytest(y)(0) så gør y større
+                    Do While Cells(2 + i, 2).Value > intplates(x)(y)(2) And y < UBound(intplates(x)) ' fejl ved plateid(max)
+                
+                    y = y + 1
+
+                    Loop 'hopper ud af loop når intplates er større end Cells(2+i,2)
+                    If Cells(2 + i, 2).Value < intplates(x)(y)(2) Then
+                    'indsætter information om frysere når plateID er mindre end intplates(x)(y)(2)
+                        For Z = 0 To 384
+                            Cells(2 + i + Z, 4 + (x * 3)).Value = intplates(x)(y)(0)
+                            Cells(2 + i + Z, 5 + (x * 3)).Value = intplates(x)(y)(1)
+                            Cells(2 + i + Z, 6 + (x * 3)).Value = indhold384(x)
+                        Next Z
+                        i = i + 384
+                    Else
+                        i = i + 384
+                    End If
+            
+            
+            Loop
+        
+        Next x
+        
+
+        'Looper igennem dokumentet for at finde plader der ikke har tal med strings som plateID
+        'Indsætter fryserposition o.lign. for dem der matcher. (Sker kun hvis ikke array er tomt)
+        If Not UBound(strplates(0)) = 0 Then
+
+        
+            For x = LBound(strplates) To UBound(strplates)
+            i = 0 'starter fra bunden med den nye x
+    
+                Do While Cells(2 + i, 2) <> ""
+            
+                    If Cells(2 + i, 2).Value = strplates(0)(x)(1) Then
+                        For Z = 0 To 384
+                            Cells(2 + i + Z, 4 + (x * 3)).Value = strplates(0)(x)(0)
+                            Cells(2 + i + Z, 5 + (x * 3)).Value = strplates(0)(x)(1)
+                            Cells(2 + i + Z, 6 + (x * 3)).Value = indhold384(x)
+                        Next Z
+    
+                    End If
+                    
+                    
+                    
+                i = i + 384
+                Loop
+            
+            Next x
+        End If
+        
+        
+        
+        
+    End If 'må ej fjernes
+    
+    
+End Select
+
+'**************************************************************************************
+
+'laver ny WorkBook og kopierer indholdet af BioPac96 Sheetet ind, sletter oprindeligt biopac sheet
+
+    Set NewBook = Workbooks.Add
+     
+    ThisWorkbook.Sheets("BioPac96").Copy Before:=NewBook.Sheets(1)
+    Application.DisplayAlerts = False
+    ThisWorkbook.Sheets("BioPac96").Delete
+    Application.DisplayAlerts = True
+
+
+TomPopul:
+
+
+
+
+End Sub
+
+Public Function InsertionSort2(ByRef pvarArray As Variant) 'kan tage 2-dimensionelt array (hvor array(0) = maxplate
+    Dim i As Long
+    Dim j As Long
+    Dim iMin As Long
+    Dim iMax As Long
+    Dim varSwap As Variant
+    
+    'har en ekstra dimension (0) = indhold, skal i mit tilfælde loopes 3 gange)
+For x = LBound(pvarArray) To UBound(pvarArray)
+    iMin = LBound(pvarArray(x)) + 1 'sorterer 2 sidste dimensioner
+    iMax = UBound(pvarArray(x))
+    i = 0
+    For i = iMin To iMax
+
+        varSwap = pvarArray(x)(i) 'variabel der skal swappes (skal være (x)(i))
+        
+        For j = i To iMin Step -1
+            If varSwap(2) < pvarArray(x)(j - 1)(2) Then pvarArray(x)(j) = pvarArray(x)(j - 1) Else Exit For 'tilføje pvarArray(x)(j-1)(2)
+        Next j
+        pvarArray(x)(j) = varSwap
+    Next i
+Next x
+    
+InsertionSort2 = pvarArray 'output er et sorteret array sorteret efter inputarray()(0)
+    
+    
+End Function
+Public Function InsertionSort1(ByRef pvarArray As Variant) 'kan tage 2-dimensionelt array (hvor array(0) = maxplate
+    Dim i As Long
+    Dim j As Long
+    Dim iMin As Long
+    Dim iMax As Long
+    'Cells(25, 10).Value = UBound(pvarArray) 'debug
+    Dim varSwap As Variant
+    
+    iMin = LBound(pvarArray) + 1
+    iMax = UBound(pvarArray)
+    For i = iMin To iMax
+        varSwap = pvarArray(i) 'variabel der skal swappes
+        For j = i To iMin Step -1
+            If varSwap(2) < pvarArray(j - 1)(2) Then pvarArray(j) = pvarArray(j - 1) Else Exit For
+        Next j
+        pvarArray(j) = varSwap
+    Next i
+
+    
+InsertionSort1 = pvarArray 'output er et sorteret array sorteret efter inputarray()(0)
+    
+    
+End Function
+Function delerarrayopinumericognot(etarray) 'skal tageet array, og en binær værdi som input, 0 giver numeric, 1 giver non-numeric
+Dim intArray()
+Dim stringarray()
+Dim intarray2()
+Dim stringarray2()
+Dim intcase(2)
+Dim stringcase(2)
+Dim stringarrayfin()
+Dim intarrayfin()
+Dim finalarray(1)
+y = 0
+Z = 0
+varint = 0
+varstr = 0
+
+
+'u er "indhold"
+For u = LBound(etarray) To UBound(etarray)
+    
+    x = 0
+
+    If UBound(etarray(u)) = 0 Then
+        ReDim Preserve intArray(y)
+        ReDim Preserve stringarray(Z)
+                If IsNumeric(etarray(u)(x)(2)) Then
+        
+                intcase(0) = etarray(u)(x)(0) 'frysernr
+                intcase(1) = etarray(u)(x)(1) 'fryserpos
+                intcase(2) = etarray(u)(x)(2) 'maxplateID
+                intArray(y) = intcase
+                y = y + 1
+        
+                
+        
+            Else
+        
+                stringcase(0) = etarray(u)(x)(0)
+                stringcase(1) = etarray(u)(x)(1)
+                stringcase(1) = etarray(u)(x)(2)
+                stringarray(Z) = stringcase
+                Z = Z + 1
+            
+            End If
+    Else
+        For x = LBound(etarray(u)) To UBound(etarray(u))
+        'x er "række"
+            ReDim Preserve intArray(y)
+            ReDim Preserve stringarray(Z)
+            
+                'tester om tallet er numerisk
+                If IsNumeric(etarray(u)(x)(2)) Then
+            
+                    intcase(0) = etarray(u)(x)(0) 'frysernr
+                    intcase(1) = etarray(u)(x)(1) 'fryserpos
+                    intcase(2) = etarray(u)(x)(2) 'maxplateID
+                    intArray(y) = intcase
+                    y = y + 1
+            
+                    
+            
+                Else
+            
+                    stringcase(0) = etarray(u)(x)(0)
+                    stringcase(1) = etarray(u)(x)(1)
+                    stringcase(1) = etarray(u)(x)(2)
+                    stringarray(Z) = stringcase
+                    Z = Z + 1
+                
+                End If
+            
+
+        
+    
+        Next x
+    End If
+
+ReDim Preserve intarray2(varint)
+ReDim Preserve stringarray2(varstr)
+
+
+'laver if, hvis intarray ikke er tomt skal det indsættes i intarray2(variabel) og variabel skal øges
+    If Not IsEmpty(intArray) Then 'bugger ud for intarray(1) ikke findes fordi den kun indeholder 1 værdi i 2. loop
+        intarray2(varint) = intArray()
+        
+        varint = varint + 1
+        ReDim intArray(0)
+        y = 0
+
+    End If
+    If Not IsEmpty(stringarray) Then
+        stringarray2(varstr) = stringarray()
+        varstr = varstr + 1
+        ReDim stringarray(0)
+        Z = 0
+    End If
+
+
+Next u
+'hvis sidste element i intarray er tomt, så fjern det
+If Not IsEmpty(intArray(0)) Then
+
+    If IsEmpty(intArray(UBound(intArray))) Then
+        ReDim Preserve intArray(LBound(intArray) To UBound(intArray) - 1)
+    End If
+End If
+
+'hvis sidste element i stringarray er tomt, så fjern det
+If Not IsEmpty(stringarray(0)) Then 'virker lidt nu
+    If IsEmpty(stringarray(UBound(stringarray))) Then
+        ReDim Preserve stringarray(LBound(stringarray) To UBound(stringarray) - 1)
+    End If
+End If
+' hvis sidste element i "etarray" er tekst bliver sidste element i intarray tomt
+' og omvendt hvis sidste element i etarray er tal bliver sidste element i stringarray tomt?
+
+finalarray(0) = InsertionSort2(intarray2())
+finalarray(1) = stringarray2()
+delerarrayopinumericognot = finalarray()
+
+
+End Function
+Function hentallerækkerogmaxplate(indhold, populnummer, Path)
+
+Dim mitarray(3)
+Dim array2()
+
+MyFile = Path
+Application.ScreenUpdating = False
+Workbooks.Open Filename:=MyFile
+
+'looper igennem alle rækker, fylder relevant info ind i array
+Do While Cells(i + 1, 1).Value <> ""
+    ReDim Preserve array2(x) 'skal måske flyttes ind i if statement for at løse problemet?
+    
+    If Cells(i + 1, 2).Value = populnummer And Cells(i + 1, 7).Value = indhold Then
+    'indsæt maxplateID, fryserpos, frysernr i et 3-dimensionelt array (sorteres senere)
+        mitarray(0) = Cells(i + 1, 3).Value 'frysernr
+        mitarray(1) = Cells(i + 1, 4).Value 'fryserpos
+        mitarray(2) = Cells(i + 1, 6).Value 'max PlateID
+        mitarray(3) = Cells(i + 1, 5).Value 'min PlateID
+        
+        array2(x) = mitarray
+        x = x + 1
+    End If
+    
+i = i + 1
+        
+Loop
+ 
+'fjerne det sidste element hvis det er tomt (bug i loopet) laver Redim med x=x+1 en gang for meget
+If IsEmpty(array2(UBound(array2))) Then 'nyt
+            
+    ReDim Preserve array2(LBound(array2) To UBound(array2) - 1) 'nyt
+                     
+End If 'nyt
+ 
+hentallerækkerogmaxplate = array2() 'output = 2 dimensionelt array; array(0)=array2(0)
+
+ActiveWorkbook.Close savechanges:=False
+Application.ScreenUpdating = True
+End Function
+Function læserindhold(populnummer, Path) 'skal tage populnr som input og sti (en anden ved 384 end ved 96)
+Dim array1()
+Dim array2()
+'Dim array3(1)
+
+MyFile = Path
+Application.ScreenUpdating = False
+Workbooks.Open Filename:=MyFile
+
+populnr = populnummer
+y = 0
+Do While Cells(i + 1, 4).Value <> "" 'så længe fryserpos ikke er tom
+
+    ReDim Preserve array2(y) 'opdatér array2
+    ReDim Preserve array1(y)
+    
+    If Cells(i + 1, 2).Value = populnr And Cells(i + 1, 6).Value <> "" Then 'hvis celler har de værdier der kræves
+
+        'tester om array2 er tomt, hvis ja så sættes værdien bare ind
+        If UBound(array2) = 0 Then
+        
+            array1(y) = Cells(i + 1, 7).Row 'row
+            array2(y) = Cells(i + 1, 7).Value 'indhold
+            y = y + 1
+
+        Else
+        'Ellers tester om værdien allrede findes i array2
+
+           Z = Filter(array2, Cells(i + 1, 7).Value)
+
+                If UBound(Z) < 0 Then 'hvis værdien ikke findes i arrayet tilføjes den
+                
+                    array1(y) = Cells(i + 1, 7).Row 'row
+                    array2(y) = Cells(i + 1, 7).Value 'indhold
+                    y = y + 1
+
+                Else
+                    
+                    'Do nothing
+
+                End If
+        
+        End If
+
+    Else
+        
+        ' Do nothing
+    
+    End If
+    
+
+    
+i = i + 1
+
+Loop
+
+If IsEmpty(array2(UBound(array2))) Then
+            
+    ReDim Preserve array2(LBound(array2) To UBound(array2) - 1)
+                     
+End If
+
+' output skal er array1 og array2
+'array3(0) = array2() 'indhold
+'array3(1) = array1() 'row
+læserindhold = array2()
+
+ActiveWorkbook.Close savechanges:=False
+Application.ScreenUpdating = True
+
+End Function
+Public Function BubbleSort1(ByRef pvarArray As Variant)
+    Dim i As Long
+    Dim iMin As Long
+    Dim iMax As Long
+    Dim varSwap As Variant
+    Dim blnSwapped As Boolean
+For x = LBound(pvarArray) To UBound(pvarArray)
+    iMin = LBound(pvarArray(x))
+    iMax = UBound(pvarArray(x)) - 1
+    Do
+        blnSwapped = False
+        For i = iMin To iMax
+            If pvarArray(x)(i)(2) > pvarArray(x)(i + 1)(2) Then
+                varSwap = pvarArray(i)
+                pvarArray(i) = pvarArray(i + 1)
+                pvarArray(i + 1) = varSwap
+                blnSwapped = True
+            End If
+        Next
+        iMax = iMax - 1
+    Loop Until Not blnSwapped
+Next x
+    
+BubbleSort1 = pvarArray
+End Function
+
+Private Sub ComboBox1_Change()
+
+End Sub
+
+Private Sub ComboBox2_Change()
+
+End Sub
+
+Private Sub CommandButton1_Click()
+
+
+Functionmedsubogfunc
+
+
+End Sub
+
+Private Sub Label1_Click()
+
+End Sub
+
+Private Sub Label2_Click()
+
+End Sub
+
+
+
+
+
+
+
+
+
+Sub testmacro(control As IRibbonControl)
+Cells(1, 1) = 1
+MyFile = "C:\Users\Andreas\Dropbox\Bachelorprojekt\Excel test mappe\Formatterer Biopac\Sti eksempel.xlsx"
+
+Application.ScreenUpdating = False
+Workbooks.Open Filename:=MyFile
+i = 0
+
+Do While ActiveSheet.Cells(1, i + 2).Value <> ""
+
+    With UserForm1.ComboBox1
+        'Lave et for loop der looper igennem cellerne i række 1
+        'alle kolonner og adder værdier fra dem som items.
+        
+        
+        
+        
+        .AddItem ActiveSheet.Cells(1, i + 2).Value & "-" & ActiveSheet.Cells(2, i + 2).Value
+    
+        
+    End With
+    i = i + 1
+Loop
+
+ActiveWorkbook.Close savechanges:=False
+Application.ScreenUpdating = True
+
+
+With UserForm1.ComboBox2
+    .AddItem "96 plader"
+    .AddItem "384 plader"
+    .AddItem "Koncentrationer"
+End With
+
+UserForm1.Show
+End Sub
