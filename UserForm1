@@ -351,9 +351,9 @@ Dim pladeinfo(6)
  
 ' Den mappe hvor filerne skal findes, og de filer der skal ledes efter (alle der slutter med .xls*)
 
-MyFile = Dir(Path & "*.xls?")
+MyFile = Dir(Path & "\" & "*.xls?")
 
-    
+'MsgBox (MyFile) ' debug
 
 dirloop = -1
 'Looper igennem alle filer indtil alle er loopet igennem.
@@ -372,12 +372,13 @@ Do While MyFile <> ""
     
     'Slår screen updating fra (så man ikke ser filen blive åbnet) og åbner workbook (næste fil)
     Application.ScreenUpdating = False
-    Workbooks.Open Filename:=Path & MyFile
+    Workbooks.Open Filename:=Path & "\" & MyFile
     
         With Worksheets(1).Range("a1:G70")
             Set Cellx = .Find("1", LookIn:=xlValues, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext)
             Set Celly = .Find("A", LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlNext)
         End With
+    
     Cellx = Cellx.Column
     Celly = Celly.Row
 
@@ -394,7 +395,7 @@ Do While MyFile <> ""
     pladeinfo(5) = Cells(24, 3).Value ' Isolationstid
     pladeinfo(6) = Cells(24, 9).Value ' Instrument
     
-    Range("B1:C1").MergeCells = True
+'    Range("B1:C1").MergeCells = True
     
 
         Do Until y = platerows + 1 ' Looper igennem ad x aksen 12 kan evt være variabel så man kan definere om det er 384 eller 96 plate
@@ -432,7 +433,7 @@ Do While MyFile <> ""
     pladeinfo(2) = wellcol()
     filer(dirloop) = pladeinfo()
     
-
+'    MsgBox (MyFile)
      
     'Lukker det excel ark der er blevet søgt i uden at gemme
     ActiveWorkbook.Close savechanges:=False
@@ -1009,7 +1010,7 @@ Case "96 plader"
     'Genererer Array med stier der skal loopes igennem
     DeFilerDerTestes = 96
     stiarray = stierfunction(DeFilerDerTestes, KolonneDerTestes)
-    
+
     'tester om arrayet er tomt:
     If Len(Join(stiarray, "")) = 0 Then
         
@@ -1040,9 +1041,9 @@ Case "96 plader"
     
         'TEST
         For x = LBound(stiarray) To UBound(stiarray) 'looper igennem stier
-            
             plates = SimpelTest2(stiarray(x), i96)
-
+            
+            
             For n = LBound(plates) To UBound(plates) 'looper igennem filer i den sti
             i = firstrowofpath - 2
                 For i = LBound(plates(n)(0)) To UBound(plates(n)(0)) 'looper igennem værdier hentet fra hver fil
