@@ -867,6 +867,17 @@ Loop
 elevatorposogmaxIDallefiler = finalarray()
 End Function
 
+Function random_num()
+' random_num bruges til at generere et random nummer som igen skal bruges til post-fix på sheetes navn når der tests
+' for at undgå at 2 sheets får det samme navn så tests kan køre hurtigere.
+    Randomize
+    
+    random_number = Int(10000 * Rnd) + 1
+    
+    random_num = random_number
+
+
+End Function
 
 Sub Functionmedsubogfunc()
 
@@ -890,7 +901,7 @@ KolonneDerTestes = 2 + ComboBox1.ListIndex 'trækker en fra fordi listindex star
 populnummer = Split(ComboBox1, "-")(0)
 'Opretter worksheet (navn skal ændres på baggrund af input
 
-Worksheets.Add(After:=Worksheets(1)).Name = "BioPac96"
+Worksheets.Add(After:=Worksheets(1)).Name = "BioPac96" & random_num()
 
 ' tester om stiarray er tomt.
 
@@ -1102,7 +1113,7 @@ Case "96 plader"
         Range("A1", "A" & lastrow).Resize(1, UBound(ID) + 1) = ID
         
         'finder den range som værdier er pastet ind i.
-        Set targetWorksheet = Worksheets("BioPac96")
+        Set targetWorksheet = Worksheets(2) 'sætter lig 2 fordi det nye sheet altid er nr 2
         With targetWorksheet
             Set testRange = .Range(.Cells(1, 1), .Cells(1, UBound(ID) + 1)) 'ActiveSheet.UsedRange.Columns.Count
         End With
