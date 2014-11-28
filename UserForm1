@@ -1064,24 +1064,17 @@ Case "96 plader"
         firstrow = lastrow + 1
         
     
-        'TEST
-        'MsgBox (UBound(stiarray))
         For x = LBound(stiarray) To UBound(stiarray) 'looper igennem stier
-            'MsgBox (x)
             plates = SimpelTest2(stiarray(x), i96)
             
 
             
             For n = LBound(plates) To UBound(plates) 'looper igennem filer i den sti
-          '  MsgBox (plates(0)(0)(0))
-'            i = firstrowofpath - 2 DEBUG
-'****************   BUGBUGBUGBUGBUG     ********************************
+            i = firstrowofpath - 2 'DEBUG
                 For i = LBound(plates(n)(0)) To UBound(plates(n)(0)) 'looper igennem værdier hentet fra hver fil
      
                 'stopper ved n=2 i anden sti
      
-     '           MsgBox (n)
-     '           MsgBox (plates(n)(0)(0))
                 
                 'Sætter information om ID, wellrow og wellcols ind i arrays så de alle kan sættes ind på én gang
                 
@@ -1129,6 +1122,8 @@ Case "96 plader"
 
         'sætter range = ID
         Range("A1", "A" & lastrow).Resize(1, UBound(ID) + 1) = ID
+'*******    TJEK om det er her ID sættes ind! *************
+'        MsgBox ("A" & lastrow) 'DEBUG
         
         'finder den range som værdier er pastet ind i.
         Set targetWorksheet = Worksheets(2) 'sætter lig 2 fordi det nye sheet altid er nr 2
