@@ -353,12 +353,13 @@ Dim pladeinfo(6)
 
 MyFile = Dir(Path & "\" & "*.xls?")
 
-'MsgBox (MyFile) ' debug
+MsgBox (MyFile) ' debug
 
 dirloop = -1
 'Looper igennem alle filer indtil alle er loopet igennem.
 EtLoop:
 Do While MyFile <> ""
+    
     i = 0
     dirloop = dirloop + 1
     'Definerer variable.
@@ -376,11 +377,12 @@ Do While MyFile <> ""
     
         With Worksheets(1).Range("a1:G70")
             Set Cellx = .Find("1", LookIn:=xlValues, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext)
-            Set Celly = .Find("A", LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlNext)
+            Set Celly = .Find("A", LookIn:=xlValues, LookAt:=xlWhole, SearchOrder:=xlByColumns, SearchDirection:=xlNext)
         End With
 
-    If Not Cellx Is Nothing Then
+    If Not Cellx Is Nothing And Not Celly Is Nothing Then
         
+ '       MsgBox (MyFile)
     
         Cellx = Cellx.Column
         'MsgBox (Cellx Is Nothing) 'Lader til at virke, hvis cellx er nothing så spring over.
@@ -1063,14 +1065,26 @@ Case "96 plader"
         
     
         'TEST
+        'MsgBox (UBound(stiarray))
         For x = LBound(stiarray) To UBound(stiarray) 'looper igennem stier
+            'MsgBox (x)
             plates = SimpelTest2(stiarray(x), i96)
             
+
             
             For n = LBound(plates) To UBound(plates) 'looper igennem filer i den sti
-            i = firstrowofpath - 2
+          '  MsgBox (plates(0)(0)(0))
+'            i = firstrowofpath - 2 DEBUG
 '****************   BUGBUGBUGBUGBUG     ********************************
                 For i = LBound(plates(n)(0)) To UBound(plates(n)(0)) 'looper igennem værdier hentet fra hver fil
+     
+                'stopper ved n=2 i anden sti
+     
+     '           MsgBox (n)
+     '           MsgBox (plates(n)(0)(0))
+                
+                'Sætter information om ID, wellrow og wellcols ind i arrays så de alle kan sættes ind på én gang
+                
                     ReDim Preserve ID(y)
                     ReDim Preserve wellrows(y)
                     ReDim Preserve wellcols(y)
@@ -1081,15 +1095,19 @@ Case "96 plader"
                     wellcols(y) = plates(n)(2)(i)
                     
                     y = y + 1
+                    
+                'Frem til her
                 Next i
                 firstrow = lastrow + 1
                 lastrow = (ActiveSheet.UsedRange.Rows.Count) + 96
                 'indsætter den mere statiske information om 96 pladerne i loops /wells
+                
                 For col = 0 To 3
                     'thisRange = Chr(68 + col) & 96 * n + 2 & ":" & Chr(68 + col) & 96 * (n + 1) + 1
                     thisRange = Chr(68 + col) & firstrow & ":" & Chr(68 + col) & lastrow
                     Range(thisRange).Value = plates(n)(3 + col)
                 Next col
+                
                 'MsgBox (96 * (n + 1) + 1) 'lastrow -1
                ' MsgBox (96 * n + 2) 'firstrowofpath
                 
@@ -1768,3 +1786,5 @@ End Sub
 Private Sub Label2_Click()
 
 End Sub
+
+
