@@ -353,7 +353,7 @@ Dim pladeinfo(6)
 
 MyFile = Dir(Path & "\" & "*.xls?")
 
-MsgBox (MyFile) ' debug
+'MsgBox (MyFile) ' debug
 
 dirloop = -1
 'Looper igennem alle filer indtil alle er loopet igennem.
@@ -361,7 +361,7 @@ EtLoop:
 Do While MyFile <> ""
     
     i = 0
-    dirloop = dirloop + 1
+'DEBUG    dirloop = dirloop + 1
     'Definerer variable.
     Dim Page$, MySheet$
     
@@ -383,7 +383,7 @@ Do While MyFile <> ""
     If Not Cellx Is Nothing And Not Celly Is Nothing Then
         
  '       MsgBox (MyFile)
-    
+        dirloop = dirloop + 1
         Cellx = Cellx.Column
         'MsgBox (Cellx Is Nothing) 'Lader til at virke, hvis cellx er nothing så spring over.
         Celly = Celly.Row
@@ -1113,9 +1113,9 @@ Case "96 plader"
                 
                 
             Next n
-            'firstrowofpath = lastrow + 1
+            firstrowofpath = lastrow + 1
             'finder sidste rækker i dokumentet
-            'lastrow = ActiveSheet.UsedRange.Rows.Count
+            lastrow = ActiveSheet.UsedRange.Rows.Count
             firstrowofpath = lastrowofpath + 1
             lastrowofpath = ActiveSheet.UsedRange.Rows.Count
             
