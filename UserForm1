@@ -631,16 +631,16 @@ Dim elevatoroversigt()
 Dim finalarray()
 'Dim sortedarray()
 
-MyFile = Dir(Path & "*.xls?")
+MyFile = Dir(Path & "\" & "*.xls?")
+
 i = 0
 Do While MyFile <> ""
     'Definerer variable.
     Dim Page$, MySheet$
-    
     MySheet = ActiveSheet.Name
 
     Application.ScreenUpdating = False
-    Workbooks.Open Filename:=Path & MyFile
+    Workbooks.Open Filename:=Path & "\" & MyFile
 
 
         'Finder elevatorpositioner (byt ud med funktion?)
@@ -1004,7 +1004,7 @@ Case "96 plader"
         
         'MsgBox (elevatorarray(0) & " : ") '& Size(elevatorarray()))
         'Laver et array for alle filer i én bestemt mappe (skal udbygges så elevatorer har en plads i sti arket.
-        Elevatorinfo = elevatorposogmaxIDallefiler(elevatorarray(0))
+        elevatorinfo = elevatorposogmaxIDallefiler(elevatorarray(0))
         Dim allemaxplateID() As Integer
         Dim alleelevatorID()
         Dim joinarr(1)
@@ -1013,14 +1013,16 @@ Case "96 plader"
 
         'laver elevatorinfo om til 2 arrays, et med elevatorID og et med maxplateID, laves for at fjerne 1 dimension
         i = 0
-        For x = LBound(Elevatorinfo) To UBound(Elevatorinfo)
-            længde = UBound(Elevatorinfo(x)(1))
+        
+        For x = LBound(elevatorinfo) To UBound(elevatorinfo)
+        
+            længde = UBound(elevatorinfo(x)(1))
             
             For y = 0 To længde
                 ReDim Preserve allemaxplateID(i) 'resetter ved hver loop, y skal være noget andet
                 ReDim Preserve alleelevatorID(i)
-                alleelevatorID(i) = Elevatorinfo(x)(0)
-                allemaxplateID(i) = Elevatorinfo(x)(1)(y)
+                alleelevatorID(i) = elevatorinfo(x)(0)
+                allemaxplateID(i) = elevatorinfo(x)(1)(y)
                 
                 i = i + 1
             Next y
@@ -1070,10 +1072,10 @@ Case "96 plader"
 
         'samletsætning er det fulde if-statement
         samletsætning = samletsætning & """ID værdi findes ikke i elevatorfiler""" & slutparantes
-
+'*************************** BUG ************************
         'indsætter elevatornr if statement (samletsætning)
         Range("H2:H" & lastrow).Value2 = samletsætning
-
+'*************************** BUG ************************
 
 
         For x = LBound(fryserogmaxplate) To UBound(fryserogmaxplate)
