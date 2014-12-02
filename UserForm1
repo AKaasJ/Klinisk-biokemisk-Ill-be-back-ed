@@ -178,163 +178,6 @@ tællerrækker384 = rækker()
 
 End Function
 
-Function SimpelTest(Plate As Integer, Path, i96)
-
-Dim MyFile As String 'Navn på fil (ændres senere)
-Dim i As Integer
-i = 0
-Dim nyt()
- 
-' Den mappe hvor filerne skal findes, og de filer der skal ledes efter (alle der slutter med .xls*)
-
-MyFile = Dir(Path & "*.xls?")
-
-    
-    'DEBUG
-    ' Laver overskrifter i dokumentet (til informationen vi henter)
-        'With ThisWorkbook.ActiveSheet.Cells(1, 1)
-        '    .Value = "ID"
-        '    .Offset(0, 1).Value = "Well"
-        '    .Offset(0, 3).Value = "Filnavn + link til fil"
-        '    .Offset(0, 4).Value = "PlateID"
-        '    .Offset(0, 5).Value = "Isolationstid"
-        '    .Offset(0, 6).Value = "Instrument til isolation"
-        'End With
-    'DEBUG
-    
-'Looper igennem alle filer indtil alle er loopet igennem.
-EtLoop:
-Do While MyFile <> ""
-    'Definerer variable.
-    Dim Page$, MySheet$
-    
-    'Bruger nuværende ark til at gemme data i som der søges efter
-    MySheet = ActiveSheet.Name
-    
-    'Hopper til ErrorHandler ved en fejl.
-'     On Error GoTo ErrorHandler
-    
-    'Slår screen updating fra (så man ikke ser filen blive åbnet) og åbner workbook (næste fil)
-    Application.ScreenUpdating = False
-    Workbooks.Open Filename:=Path & MyFile
-    
-        With Worksheets(1).Range("a1:G70")
-            Set Cellx = .Find("1", LookIn:=xlValues, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext)
-            Set Celly = .Find("A", LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlNext)
-        End With
-    Cellx = Cellx.Column
-    Celly = Celly.Row
-    'MsgBox (Cellx & " : " & Celly)
-    ' Initialiserer konstanter til loops
-    'Cellx = 2
-    'Celly = 5 'koordinater på det første ID (A1)
-    
-    Platesize = Plate
-    platerows = Platesize / 12
-    platecol = Platesize / 8
-    
-    y = 1
-    x = 1
-    
-
-
-    
-    Range("B1:C1").MergeCells = True
-    
-
-        Do Until y = platerows + 1 ' Looper igennem ad x aksen 12 kan evt være variabel så man kan definere om det er 384 eller 96 plate
-            
-            Do Until x = platecol + 1  ' Looper igennem ad y aksen
-                
-               ActiveSheet.Cells(Celly, Cellx).Select
-'I stedet for at skrive data ind i celler her, gem i array som funktion outputter?
-               ReDim Preserve nyt(i)
-               nyt(i) = Cells(Celly, Cellx).Value
-               
-               i = i + 1
-               
-               
-               'Skriver data ind i det excel ark som der søges fra
-'               With ThisWorkbook.ActiveSheet.Cells(i, 1) ' redigeret
-'                   .Value = Cells(Celly, Cellx).Value ' redigeret
-'                   .Offset(0, 1).Value = Chr(64 + y) ' Finder x position på ID i plate (Well)
-'                   .Offset(0, 2).Value = x ' Finder y position på ID i plate (Well)
-'                   .Interior.ColorIndex = Cells(Celly, Cellx).Interior.ColorIndex
-                   'Skriver filnavn ind og laver et hyperlink til det.
-'                   .Hyperlinks.Add Anchor:=.Offset(0, 3), _
-'                        Address:=Path + MyFile, _
-'                        TextToDisplay:=MyFile
-                
-'                   .Offset(0, 4).Value = Cells(22, 3).Value ' PlateID
-'                   .Offset(0, 5).Value = Cells(24, 3).Value ' Isolationstid
-'                   .Offset(0, 6).Value = Cells(24, 9).Value ' Instrument
-                   
-'                   ' Fitter kolonner
-'                   .Columns.AutoFit
-'                   .Offset(0, 1).Columns.AutoFit
-'                   .Offset(0, 3).Columns.AutoFit
-'                   .Offset(0, 4).Columns.AutoFit
-'                   .Offset(0, 5).Columns.AutoFit
-'               End With
-               
-            ' Incrementer inden loop køres igen
-               
-
-            Cellx = Cellx + 1
-            x = x + 1
-            
-            
-            Loop
-        
-        ' Incrementer inden loop køres igen og resetter x så x-akse loopet starter fra 1
-        
-        Cellx = 2
-        Celly = Celly + 2
-        x = 1
-        y = y + 1
-               
-        Loop
-        
-    'Lukker det excel ark der er blevet søgt i uden at gemme
-    ActiveWorkbook.Close savechanges:=False
-    Application.ScreenUpdating = True
-    MyFile = Dir 'Dir ændrer MyFile til næste fil i rækken.
-
-Loop
-
-SimpelTest = nyt()
-    
-'Error Handling afsnit. (Overflødigt?)
-ErrorHandler:
-Select Case Err.Number
-        'Common error #1: Stien eller navnet på filen er forkert.
-        ' Fejlen opstår hvis man bruger macroen på et dokument man har åbent. (kan fixes?)
-        Case 1004
-            Range("D10:E11").ClearContents
-            Application.ScreenUpdating = True
-            MsgBox "The workbook " & MyFile & " could not be found in the path" & vbCrLf & MyFolder & "."
-            MyFile = Dir() ' indsat ny
-        Resume EtLoop ' ny
-'        Exit Sub ' ny
-        
-        'Common error #2: Det der søges på findes ikke i dokumentet.
-        Case 9, 91
-            ThisWorkbook.ActiveSheet.Cells(Celly, Cellx).Offset(0, 1).Value = "Not Found"
-   '         ThisWorkbook.Sheets(MySheet).Range("D10:E11").ClearContents
-            Workbooks(MyFile).Close False
-            Application.ScreenUpdating = False
-            MsgBox "The value " & Txt & " was not found in The workbook " & MyFile & " in the path" & vbCrLf & MyFolder & "."
-            MyFile = Dir ' indsat
-        Resume EtLoop ' Resume lader til at lade én "returne" til loopet fra før
- '       Exit Sub ' Et problem hvis sidste fil ikke har søgeordet i sig?
-        
-        'General case: Slår screenupdating til og slutter macro (så dukker fejlbeskeden op).
-        Case Else
-            Application.ScreenUpdating = True
-        Exit Function
-End Select
-
-End Function
 Function SimpelTest2(Path, i96)
 
 Dim MyFile As String 'Navn på fil (ændres senere)
@@ -1121,7 +964,12 @@ Case "96 plader"
         Next x
 
         'sætter range = ID
-        Range("A1", "A" & lastrow).Resize(1, UBound(ID) + 1) = ID
+        ActiveSheet.Range("A2", "A" & lastrow).Value = WorksheetFunction.Transpose(ID)
+
+        
+        
+        
+        
 '*******    TJEK om det er her ID sættes ind! *************
 '        MsgBox ("A" & lastrow) 'DEBUG
         
@@ -1129,6 +977,7 @@ Case "96 plader"
         Set targetWorksheet = Worksheets(2) 'sætter lig 2 fordi det nye sheet altid er nr 2
         With targetWorksheet
             Set testRange = .Range(.Cells(1, 1), .Cells(1, UBound(ID) + 1)) 'ActiveSheet.UsedRange.Columns.Count
+            MsgBox (UBound(ID))
         End With
         
         'indsætter ID og well info
@@ -1781,5 +1630,7 @@ End Sub
 Private Sub Label2_Click()
 
 End Sub
+
+
 
 
