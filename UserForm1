@@ -963,35 +963,16 @@ Case "96 plader"
             
         Next x
 
-        'sætter range = ID
+        'Sætter ID + wellrows + Wellcols ind i dokumentet (som genereret i simpeltest2)
         ActiveSheet.Range("A2", "A" & lastrow).Value = WorksheetFunction.Transpose(ID)
+        ActiveSheet.Range("B2", "B" & lastrow).Value = WorksheetFunction.Transpose(wellrows)
+        ActiveSheet.Range("C2", "C" & lastrow).Value = WorksheetFunction.Transpose(wellcols)
+
 
         
-        
-        
-        
-'*******    TJEK om det er her ID sættes ind! *************
-'        MsgBox ("A" & lastrow) 'DEBUG
-        
-        'finder den range som værdier er pastet ind i.
+        'Unødvendigt?
         Set targetWorksheet = Worksheets(2) 'sætter lig 2 fordi det nye sheet altid er nr 2
-        With targetWorksheet
-            Set testRange = .Range(.Cells(1, 1), .Cells(1, UBound(ID) + 1)) 'ActiveSheet.UsedRange.Columns.Count
-            MsgBox (UBound(ID))
-        End With
-        
-        'indsætter ID og well info
-        testRange.Copy
-        Range("A2").PasteSpecial Transpose:=True
-        testRange.Value = wellrows
-        testRange.Copy
-        Range("B2").PasteSpecial Transpose:=True
-        testRange.Value = wellcols
-        testRange.Copy
-        Range("C2").PasteSpecial Transpose:=True
-        'clear contents i første række
-        testRange.ClearContents
-        
+        'unødvendigt?
         
         'henter de forskellige "indhold"
         indhold = læserindhold(populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\fryseroversigt.xlsx") 'array med alle de forskellige indhold skal nok også bruge sti
