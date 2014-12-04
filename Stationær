@@ -1219,9 +1219,73 @@ Case "96 plader"
         samletsætning = samletsætning & """ID værdi findes ikke i elevatorfiler""" & slutparantes
 
         'indsætter elevatornr if statement (samletsætning)
-        Range("H2:H" & lastrow).Value2 = samletsætning
+' DEBUG       Range("H2:H" & lastrow).Value2 = samletsætning
+
+'**********************DEBUG************************
 
 
+'This code will add new code module named NewModule to the VBProject of the active workbook.
+'The type of VBComponent is specified by the value of the parameter passed to the Add method.
+        
+        'OPRETTER MODULET
+        
+        Dim VBProj As VBIDE.VBProject
+        Dim VBComp As VBIDE.VBComponent
+        
+        Set VBProj = ThisWorkbook.VBProject 'normalt ActiveWorkbook
+        Set VBComp = VBProj.VBComponents.Add(vbext_ct_StdModule)
+        VBComp.Name = "NewModule2"
+
+        Dim CodeMod As VBIDE.CodeModule
+        Dim LineNum As Long
+        Const DQUOTE = """" ' one " character
+
+        Set VBProj = ThisWorkbook.VBProject 'normalt ActiveWorkbook
+        Set VBComp = VBProj.VBComponents("NewModule2")
+        Set CodeMod = VBComp.CodeModule
+        
+        'GENERER SUBROUTINEN I MODULET
+        
+        With CodeMod 'genererer kode til den subroutine modulet skal indeholde (if statement)
+                     'ideen er at subroutinen går alle rækker igennem og bestemmer deres elevatornr.
+            LineNum = .CountOfLines + 1
+            .InsertLines LineNum, "Public Sub SayHello()" 'skriver navnet på proceduren i modulet
+            LineNum = LineNum + 1 'itererer til næste linje (husk der skal et loop ind)
+            .InsertLines LineNum, "Application.ScreenUpdating = False"
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "for y = 2  to " & lastrow 'indsætter den linje der skal lave loop inde i modulet
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "if cells(y,1).value < " & (sortedelevatorinfo(0)(0)) & " then "
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "Cells(y, 8).Value = " & (sortedelevatorinfo(0)(1)) 'indsætter den linje der skal lave loop inde i modulet"
+            LineNum = LineNum + 1
+            For x = LBound(sortedelevatorinfo) + 1 To UBound(sortedelevatorinfo) - 1
+            .InsertLines LineNum, "Elseif cells(y,1).value < " & (sortedelevatorinfo(x)(0)) & " then cells(y,8).value = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
+            LineNum = LineNum + 1
+            Next x
+            .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & "ID værdi findes ikke i elevatorfiler" & DQUOTE
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "end if"
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "next y" 'indsætter den linje der skal lave loop inde i modulet
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "Application.ScreenUpdating = True"
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "End Sub"
+        End With
+        'MsgBox (ThisWorkbook.Name)
+        'KØRER MODULET / SUBROUTINEN
+        'Call SayHello
+        'Application.OnTime Now, ThisWorkbook.Name & "!SayHello"
+        Call runsnewmodule2 'Virker ikke helt da modulet bliver gemt i workbooken og ikke add-inet
+        
+        'SLETTER MODULET:
+        Set VBProj = ThisWorkbook.VBProject
+        Set VBComp = VBProj.VBComponents("NewModule2")
+        VBProj.VBComponents.Remove VBComp
+
+
+'**********************DEBUG***********************
 
         For x = LBound(fryserogmaxplate) To UBound(fryserogmaxplate)
         
@@ -1734,7 +1798,16 @@ Next x
     
 BubbleSort1 = pvarArray
 End Function
+Sub runsnewmodule2()
+ 
+Call SayHello 'modulet bliver slettet inden det bliver kørt?
+'DEBUG
+'        Set VBProj = ThisWorkbook.VBProject
+'        Set VBComp = VBProj.VBComponents("NewModule2")
+'        VBProj.VBComponents.Remove VBComp
+'DEBUG
 
+End Sub
 Private Sub ComboBox1_Change()
 
 End Sub
