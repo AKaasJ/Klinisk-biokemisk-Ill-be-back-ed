@@ -1,0 +1,59 @@
+Sub AddModuleToProject()
+'This code will add new code module named NewModule to the VBProject of the active workbook.
+'The type of VBComponent is specified by the value of the parameter passed to the Add method.
+        Dim VBProj As VBIDE.VBProject
+        Dim VBComp As VBIDE.VBComponent
+        
+        Set VBProj = ActiveWorkbook.VBProject
+        Set VBComp = VBProj.VBComponents.Add(vbext_ct_StdModule)
+        VBComp.Name = "NewModule"
+End Sub
+
+Sub AddProcedureToModule()
+'Creating a procedure via VBA code is really quite simple. Build up a text string of the code, using vbCrLf to
+'create new lines, and then insert that text with the InsertLines method, passing to it the line number and the
+'text string. The following code will add a simple "Hello World" procedure named SayHello to the end of the
+'module named NewModule.
+
+
+        Dim VBProj As VBIDE.VBProject
+        Dim VBComp As VBIDE.VBComponent
+        Dim CodeMod As VBIDE.CodeModule
+        Dim LineNum As Long
+        Const DQUOTE = """" ' one " character
+
+        Set VBProj = ActiveWorkbook.VBProject
+        Set VBComp = VBProj.VBComponents("NewModule")
+        Set CodeMod = VBComp.CodeModule
+        
+        With CodeMod 'genererer kode til den subroutine modulet skal indeholde (if statement)
+					 'ideen er at subroutinen går alle rækker igennem og bestemmer deres elevatornr.
+            LineNum = .CountOfLines + 1
+            .InsertLines LineNum, "Public Sub SayHello()" 'skriver navnet på proceduren i modulet
+            LineNum = LineNum + 1 'itererer til næste linje (husk der skal et loop ind)
+            .InsertLines LineNum, "Application.ScreenUpdating = False"
+			LineNum = LineNum + 1
+			.InsertLines LineNum, "for y to row.count" 'indsætter den linje der skal lave loop inde i modulet
+			LineNum = LineNum + 1
+			.InsertLines LineNum, "if cells(y,1) < " & (sortedelevatorinfo(0)(0)) & "then cells(y,8) = " & (sortedelevatorinfo(0)(1)) 'indsætter den linje der skal lave loop inde i modulet
+			LineNum = LineNum + 1
+			for x = LBound(sortedelevatorinfo)+1 To UBound(sortedelevatorinfo) - 1
+			.InsertLines LineNum, "else if cells(y,1) < " & (sortedelevatorinfo(x)(0)) & "then cells(y,8) = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
+			LineNum = LineNum + 1
+			next x
+			.InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & "ID værdi findes ikke i elevatorfiler"  & DQUOTE
+			LineNum = LineNum + 1
+			.InsertLines LineNum, "end if"
+			LineNum = LineNum + 1
+			.InsertLines LineNum, "next y" 'indsætter den linje der skal lave loop inde i modulet
+			LineNum = LineNum + 1
+			.InsertLines LineNum, "Application.ScreenUpdating = True"
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "End Sub"
+        End With
+        
+        'Call test 'kalder test fordi man åbenbart ikke kan kalde sayhello før den er oprettet
+        
+        'husk der skal laves noget som sletter indholdet af modulet eller hele modulet?
+    
+End Sub
