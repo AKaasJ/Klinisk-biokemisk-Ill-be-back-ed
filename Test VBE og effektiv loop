@@ -1,0 +1,104 @@
+Sub mastersub()
+Call AddModuleToProject
+Call AddProcedureToModule
+End Sub
+
+Sub AddModuleToProject()
+'This code will add new code module named NewModule to the VBProject of the active workbook.
+'The type of VBComponent is specified by the value of the parameter passed to the Add method.
+        Dim VBProj As VBIDE.VBProject
+        Dim VBComp As VBIDE.VBComponent
+        
+        Set VBProj = ActiveWorkbook.VBProject
+        Set VBComp = VBProj.VBComponents.Add(vbext_ct_StdModule)
+        VBComp.Name = "NewModule"
+End Sub
+Sub AddProcedureToModule()
+'Creating a procedure via VBA code is really quite simple. Build up a text string of the code, using vbCrLf to
+'create new lines, and then insert that text with the InsertLines method, passing to it the line number and the
+'text string. The following code will add a simple "Hello World" procedure named SayHello to the end of the
+'module named NewModule.
+
+
+        Dim VBProj As VBIDE.VBProject
+        Dim VBComp As VBIDE.VBComponent
+        Dim CodeMod As VBIDE.CodeModule
+        Dim LineNum As Long
+        Const DQUOTE = """" ' one " character
+
+        Set VBProj = ActiveWorkbook.VBProject
+        Set VBComp = VBProj.VBComponents("NewModule")
+        Set CodeMod = VBComp.CodeModule
+        
+        With CodeMod
+            LineNum = .CountOfLines + 1
+            .InsertLines LineNum, "Public Sub SayHello()"
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "    MsgBox " & DQUOTE & "Hello World" & DQUOTE
+            LineNum = LineNum + 1
+            .InsertLines LineNum, "End Sub"
+        End With
+        
+        Call test 'kalder test fordi man åbenbart ikke kan kalde sayhello før den er oprettet
+        
+        'husk der skal laves noget som sletter indholdet af modulet eller hele modulet?
+    
+End Sub
+Sub test()
+
+Call SayHello
+Call DeleteModule
+
+
+End Sub
+Sub DeleteModule()
+'This code will delete Module1 from the VBProject. Note that you cannot remove any of the Sheet modules or the
+'ThisWorkbook module. In general, you cannot delete a module whose Type is vbext_ct_Document.
+
+        Dim VBProj As VBIDE.VBProject
+        Dim VBComp As VBIDE.VBComponent
+    
+        Set VBProj = ActiveWorkbook.VBProject
+        Set VBComp = VBProj.VBComponents("NewModule")
+        VBProj.VBComponents.Remove VBComp
+End Sub
+
+Sub testwith()
+Application.ScreenUpdating = False
+Dim Ratings As Range
+Dim cell As Range
+
+Call lavmangelinjer
+
+'Rows.Count bruges til at tælle alle linjer i arket
+
+'skal prøve at teste om jeg kan køre et else if statement på flere rækker, måske med with?
+Set Ratings = ActiveSheet.Range("A1:A" & Rows.Count)
+For Each cell In Ratings
+    If Len(Trim$(ActiveSheet.Range("A" & cell.Row).Value)) > 0 Then
+        If Val(cell.Value) < 1000 Then ' Make sure we have a rating before continuing...
+            ActiveSheet.Range("e" & cell.Row).Value = "under 1000"
+        Else
+            ActiveSheet.Range("e" & cell.Row).Value = "mere end 1000"
+        End If
+    End If
+Next
+Application.ScreenUpdating = True
+
+End Sub
+Function random_num()
+' random_num bruges til at generere et random nummer som igen skal bruges til post-fix på sheetes navn når der tests
+' for at undgå at 2 sheets får det samme navn så tests kan køre hurtigere.
+Randomize
+
+random_number = Int(10000 * Rnd) + 1
+
+random_num = random_number
+
+
+End Function
+Sub lavmangelinjer()
+' skal lave 250.000 rows med tilfældige værdier.
+Range("A1:A250000").Value = random_num()
+
+End Sub
