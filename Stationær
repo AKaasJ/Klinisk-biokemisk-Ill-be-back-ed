@@ -1053,7 +1053,7 @@ Case "96 plader"
         firstrow = lastrow + 1
         
     
-        'TEST
+        'TEST Her hentes ID ind i dokumentet (skal fjernes hvis det skal bruges på et dokument hvor ID allerede findes)
         For x = LBound(stiarray) To UBound(stiarray) 'looper igennem stier
             
             plates = SimpelTest2(stiarray(x), i96)
