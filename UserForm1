@@ -875,41 +875,63 @@ Case "Koncentrationer"
 Case "96 plader"
 'Dim Count()
 'dim rækkearray()
-    'Genererer Array med stier der skal loopes igennem
+
+    
+    'GENERERER ARRAY MED STIER DER SKAL LOOPES IGENNEM
+    
+    
     DeFilerDerTestes = 96
     stiarray = stierfunction(DeFilerDerTestes, KolonneDerTestes)
 
-    'tester om arrayet er tomt:
+    'TESTER OM ARRAYET ER TOMT
+    
+    
     If Len(Join(stiarray, "")) = 0 Then
         
-    'Hvis array er tomt:
+    
+    'HVIS ARRAYET ER TOMT SKRIV BESKED OG SLET WORKSHEET
+    
+    
         MsgBox ("der er ikke noget data om denne population")
         Application.DisplayAlerts = False
         ThisWorkbook.Sheets("BioPac96").Delete
         Application.DisplayAlerts = True
         GoTo TomPopul
         
+    'ELLERS HVIS ARRAYET IKKE ER TOMT
+    
     Else
-    'Hvis array ikke er tomt, kører koden:
+    
+    'SCRIPT FOR 96 PLADER KØRER:
+    
     Dim ID()
     Dim wellrows()
     Dim wellcols()
     
+    
+    'OVERSKRIFTER GENERERES
+    
     overskrifter = Array("ID", "Well", "Well", "Fil", "PlateID", "Isolationstid", "Instrument", "Elevatornr")
     Range(Cells(1, 1), Cells(1, 8)).Value = overskrifter
     
-    
-    
-        'finder sidste rækker i dokumentet
+    'FINDER SIDSTE RÆKKER I "STIER" DOKUMENTET
+        
+        
         lastrowofpath = ActiveSheet.UsedRange.Rows.Count
         firstrowofpath = lastrow + 1
         lastrow = (ActiveSheet.UsedRange.Rows.Count)
         firstrow = lastrow + 1
         
     
+    'LOOPER IGENNEM STIERNE OG HENTER DATA FRA PLADERNE I DEN RESPEKTIVE STI VHA. SIMPELTEST2
+    
         For x = LBound(stiarray) To UBound(stiarray) 'looper igennem stier
             plates = SimpelTest2(stiarray(x), i96)
             
+            
+    'PLATES VARIABLEN INDEHOLDER ALLE ID, WELLROWS OG WELLCOLUMNS FRA PLADERNE I ANDET LOOP OVERSKRIVES PLATES
+    
+    'NU BLIVER ALLE
 
             
             For n = LBound(plates) To UBound(plates) 'looper igennem filer i den sti
