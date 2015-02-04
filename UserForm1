@@ -647,7 +647,7 @@ Do While MyFile <> ""
         x = 0
         
         With Worksheets(1).Range("a1:G70")
-            Set C = .Find("elevator nr", LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlNext)
+            Set C = .Find("elevator nr. ", LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlNext)
             If Not C Is Nothing Then
                 firstaddress = C.Address
                 Do
@@ -662,7 +662,7 @@ Do While MyFile <> ""
                 Loop While Not C Is Nothing And C.Address <> firstaddress
             End If
         End With
-        
+        MsgBox (UBound(elevatorpos))
         
         'looper igennem alle elevatorer og laver et array med elevatorID og maxIDs i alle elevatorer
         For x = LBound(elevatorpos) To UBound(elevatorpos)
@@ -693,7 +693,7 @@ Do While MyFile <> ""
         
             'splitter elevatorens navn så kun ID kommer ud (f.eks. elevator nr. 1 = 1)
             mitsplit = Split(Range(elevatorpos(x)).Value, "nr. ")
-            
+            MsgBox (mitsplit(1))
             'laver et array der indeholder elevator ID og maxID
             elenrogmaxID(0) = mitsplit(1)
             elenrogmaxID(1) = maxID()
@@ -979,7 +979,7 @@ Case "96 plader"
         
         'henter fryser og max plate information om populnummeret
         For x = LBound(indhold) To (UBound(indhold))
-        
+        MsgBox (indhold(x))
             ReDim Preserve fryserogmaxplate(x)
             
             fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold(x), populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\fryseroversigt.xlsx")
@@ -1003,7 +1003,7 @@ Case "96 plader"
         elevatorarray = stierfunction("Elevator", KolonneDerTestes)
         
         'Laver et array for alle filer i én bestemt mappe (skal udbygges så elevatorer har en plads i sti arket.)
-        elevatorinfo = elevatorposogmaxIDallefiler(elevatorarray(0))
+        elevatorinfo = elevatorposogmaxIDallefiler(elevatorarray(0)) 'bug i CAG
         Dim allemaxplateID() As Integer
         Dim alleelevatorID()
         Dim joinarr(1)
@@ -1117,7 +1117,7 @@ Case "96 plader"
         .InsertLines LineNum, "Elseif cells(y,1).value < " & (sortedelevatorinfo(x)(0)) & " then cells(y,8).value = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
         LineNum = LineNum + 1
         Next x
-        .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & "ID værdi findes ikke i elevatorfiler" & DQUOTE
+        .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & "ID findes ikke i elevatorfiler" & DQUOTE
         LineNum = LineNum + 1
         .InsertLines LineNum, "end if"
         LineNum = LineNum + 1
@@ -1140,7 +1140,8 @@ Case "96 plader"
     
 'DEBUG
 
-        MsgBox (UBound(fryserogmaxplate))
+        MsgBox (UBound(fryserogmaxplate)) '=15 hos Øbus 3
+        
         For x = LBound(fryserogmaxplate) To UBound(fryserogmaxplate)
         
         
@@ -1166,14 +1167,15 @@ Case "96 plader"
             
             Next y
             'tilføj sidste række til if sætning
-            samletfrysernr = samletfrysernr & """elevatorID findes ikke i fryseroversigt""" & sluttest
-            samletfryserpos = samletfryserpos & """elevatorID findes ikke i fryseroversigt""" & sluttest
+            samletfrysernr = samletfrysernr & """N/A""" & sluttest
+            samletfryserpos = samletfryserpos & """N/A""" & sluttest
         
             'indsætter tekst i alle rækker / kolonner (for alt "indhold")
             Range(Cells(2, 9 + (3 * x)), Cells(lastrow, 9 + (3 * x))).Value2 = samletfrysernr
             Range(Cells(2, 10 + (3 * x)), Cells(lastrow, 10 + (3 * x))).Value2 = samletfryserpos
             Range(Cells(2, 11 + (3 * x)), Cells(lastrow, 11 + (3 * x))).Value2 = indhold(x)
         
+        MsgBox ("kommr vi så langt?") 'kører kun 2 gange
             
         Next x
         
@@ -1617,6 +1619,12 @@ If IsEmpty(array2(UBound(array2))) Then
     ReDim Preserve array2(LBound(array2) To UBound(array2) - 1)
                      
 End If
+'DEBUG
+
+'For i = 0 To 15
+'    MsgBox (array1(i))
+'Next i
+
 
 ' output skal er array1 og array2
 'array3(0) = array2() 'indhold
@@ -1681,6 +1689,7 @@ End Sub
 Private Sub Label2_Click()
 
 End Sub
+
 
 
 
