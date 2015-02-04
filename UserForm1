@@ -925,7 +925,7 @@ Case "96 plader"
     
     'LOOPER IGENNEM STIERNE OG HENTER DATA FRA PLADERNE I DEN RESPEKTIVE STI VHA. SIMPELTEST2
     
-        For x = LBound(stiarray) To UBound(stiarray) 'looper igennem stier
+        For x = LBound(stiarray) To UBound(stiarray) 'looper igennem stierne
             plates = SimpelTest2(stiarray(x), i96)
             
             
@@ -985,7 +985,8 @@ Case "96 plader"
             
         Next x
 
-        'Sætter ID + wellrows + Wellcols ind i dokumentet (som genereret i simpeltest2)
+    'SÆTTER ID + WELLROWS + WELLCOLS IND I DOKUMENTET (GENERERET AF SIMPELTEST2)
+
         ActiveSheet.Range("A2", "A" & lastrow).Value = WorksheetFunction.Transpose(ID)
         ActiveSheet.Range("B2", "B" & lastrow).Value = WorksheetFunction.Transpose(wellrows)
         ActiveSheet.Range("C2", "C" & lastrow).Value = WorksheetFunction.Transpose(wellcols)
@@ -996,10 +997,11 @@ Case "96 plader"
         Set targetWorksheet = Worksheets(2) 'sætter lig 2 fordi det nye sheet altid er nr 2
         'unødvendigt?
         
-        'henter de forskellige "indhold"
+    'HENTER "INDHOLD" FRA FRYSEROVERSIGT
         indhold = læserindhold(populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\fryseroversigt.xlsx") 'array med alle de forskellige indhold skal nok også bruge sti
         
-        'henter fryser og max plate information om populnummeret
+    'HENTER FRYSER OG MAX PLATE INFORMATION OM POPULEN
+        
         For x = LBound(indhold) To (UBound(indhold))
         MsgBox (indhold(x))
             ReDim Preserve fryserogmaxplate(x)
@@ -1013,14 +1015,15 @@ Case "96 plader"
             
         Next x
         
-        'skriver overskrifter ind
+    'SKRIVER OVERSKRIFTER IND TIL DEN INFORMATION DER HENTES FRA FRYSEROVERSIGTEN
+        
         For x = LBound(indhold) To UBound(indhold)
             Cells(1, 9 + (x * 3)).Value = "Frysernr"
             Cells(1, 10 + (x * 3)).Value = "Fryserposition"
             Cells(1, 11 + (x * 3)).Value = "Indhold"
         Next x
         
-        'Henter elevatorinfo og bearbejder
+    'FINDER UD AF HVILKE ELEVATORNUMRE DER FINDES I POPULEN
         
         elevatorarray = stierfunction("Elevator", KolonneDerTestes)
         
@@ -1049,6 +1052,7 @@ Case "96 plader"
             Next y
         
         Next x
+        
         'samler arrays
         For x = LBound(alleelevatorID) To UBound(alleelevatorID)
             ReDim Preserve Elevatorjoined(x)
@@ -1091,7 +1095,7 @@ Case "96 plader"
             
             
         Next x
-
+        
         'samletsætning er det fulde if-statement
         samletsætning = samletsætning & """ID værdi findes ikke i elevatorfiler""" & slutparantes
 '        MsgBox (samletsætning)
@@ -1135,7 +1139,7 @@ Case "96 plader"
         LineNum = LineNum + 1
         .InsertLines LineNum, "Cells(y, 8).Value = " & (sortedelevatorinfo(0)(1)) 'indsætter den linje der skal lave loop inde i modulet"
         LineNum = LineNum + 1
-        For x = LBound(sortedelevatorinfo) + 1 To UBound(sortedelevatorinfo) - 1
+        For x = LBound(sortedelevatorinfo) To UBound(sortedelevatorinfo)
         .InsertLines LineNum, "Elseif cells(y,1).value < " & (sortedelevatorinfo(x)(0)) & " then cells(y,8).value = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
         LineNum = LineNum + 1
         Next x
