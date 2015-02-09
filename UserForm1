@@ -1059,7 +1059,7 @@ Case "96 plader"
         
         'Laver et array for alle filer i én bestemt mappe (skal udbygges så elevatorer har en plads i sti arket.)
         elevatorinfo = elevatorposogmaxIDallefiler(elevatorarray(0)) 'bug i CAG
-        Dim allemaxplateID() As Integer
+        Dim allemaxplateID() As Long
         Dim alleelevatorID()
         Dim joinarr(1)
         Dim Elevatorjoined()
