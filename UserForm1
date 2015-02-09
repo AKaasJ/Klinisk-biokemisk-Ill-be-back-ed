@@ -662,7 +662,7 @@ Do While MyFile <> ""
                 Loop While Not C Is Nothing And C.Address <> firstaddress
             End If
         End With
-        MsgBox (UBound(elevatorpos))
+  '      MsgBox (UBound(elevatorpos))
         
         'looper igennem alle elevatorer og laver et array med elevatorID og maxIDs i alle elevatorer
         For x = LBound(elevatorpos) To UBound(elevatorpos)
@@ -693,7 +693,7 @@ Do While MyFile <> ""
         
             'splitter elevatorens navn så kun ID kommer ud (f.eks. elevator nr. 1 = 1)
             mitsplit = Split(Range(elevatorpos(x)).Value, "nr. ")
-            MsgBox (mitsplit(1))
+     '       MsgBox (mitsplit(1))
             'laver et array der indeholder elevator ID og maxID
             elenrogmaxID(0) = mitsplit(1)
             elenrogmaxID(1) = maxID()
@@ -1003,7 +1003,7 @@ Case "96 plader"
     'HENTER FRYSER OG MAX PLATE INFORMATION OM POPULEN
         
         For x = LBound(indhold) To (UBound(indhold))
-        MsgBox (indhold(x))
+       ' MsgBox (indhold(x))
             ReDim Preserve fryserogmaxplate(x)
             
             fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold(x), populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\fryseroversigt.xlsx")
@@ -1039,7 +1039,7 @@ Case "96 plader"
         i = 0
         
         For x = LBound(elevatorinfo) To UBound(elevatorinfo)
-        
+
             længde = UBound(elevatorinfo(x)(1))
             
             For y = 0 To længde
@@ -1115,7 +1115,7 @@ Case "96 plader"
     Set VBProj = ThisWorkbook.VBProject
     Set VBComp = VBProj.VBComponents.Add(vbext_ct_StdModule)
     VBComp.Name = "NewModule2"
-
+    
     Dim CodeMod As VBIDE.CodeModule
     Dim LineNum As Long
     Const DQUOTE = """" ' one " character
@@ -1143,7 +1143,7 @@ Case "96 plader"
         .InsertLines LineNum, "Elseif cells(y,1).value < " & (sortedelevatorinfo(x)(0)) & " then cells(y,8).value = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
         LineNum = LineNum + 1
         Next x
-        .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & "ID findes ikke i elevatorfiler" & DQUOTE
+        .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
         LineNum = LineNum + 1
         .InsertLines LineNum, "end if"
         LineNum = LineNum + 1
@@ -1166,7 +1166,7 @@ Case "96 plader"
     
 'DEBUG
 
-        MsgBox (UBound(fryserogmaxplate)) '=15 hos Øbus 3
+       ' MsgBox (UBound(fryserogmaxplate)) '=15 hos Øbus 3
         
         For x = LBound(fryserogmaxplate) To UBound(fryserogmaxplate)
         
@@ -1201,7 +1201,7 @@ Case "96 plader"
             Range(Cells(2, 10 + (3 * x)), Cells(lastrow, 10 + (3 * x))).Value2 = samletfryserpos
             Range(Cells(2, 11 + (3 * x)), Cells(lastrow, 11 + (3 * x))).Value2 = indhold(x)
         
-        MsgBox ("kommr vi så langt?") 'kører kun 2 gange
+   '     MsgBox ("kommr vi så langt?") 'kører kun 2 gange
             
         Next x
         
@@ -1239,7 +1239,7 @@ Case "384 plader"
     Else
     'Hvis array ikke er tomt, kører koden:
 
-        MsgBox (UBound(stiarray))
+    '    MsgBox (UBound(stiarray))
         'henter stier og skriver data ind i excel fil
         For x = LBound(stiarray) To UBound(stiarray) '96 plate
         
@@ -1639,7 +1639,8 @@ Do While Cells(i + 1, 4).Value <> "" 'så længe fryserpos ikke er tom
 i = i + 1
 
 Loop
-
+'MsgBox ((UBound(array2)))
+'MsgBox (IsEmpty(array2(UBound(array2))))
 If IsEmpty(array2(UBound(array2))) Then
             
     ReDim Preserve array2(LBound(array2) To UBound(array2) - 1)
