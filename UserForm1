@@ -723,7 +723,19 @@ Function random_num()
 
 
 End Function
+Function TransposeArray(arr As Variant)
+'Dim arr As Variant
+Dim i As Long
 
+nr = UBound(arr)
+ReDim arr2(1 To nr, 1 To 1)
+ 
+    For i = 1 To nr
+    arr2(i, 1) = arr(i)
+    Next i
+ 
+TransposeArray = arr2
+End Function
 Sub Functionmedsubogfunc()
 
 ' Looper igennem venstre side indtil der er en tom celle.
@@ -987,9 +999,22 @@ Case "96 plader"
 
     'SÆTTER ID + WELLROWS + WELLCOLS IND I DOKUMENTET (GENERERET AF SIMPELTEST2)
 
-        ActiveSheet.Range("A2", "A" & lastrow).Value = WorksheetFunction.Transpose(ID)
-        ActiveSheet.Range("B2", "B" & lastrow).Value = WorksheetFunction.Transpose(wellrows)
-        ActiveSheet.Range("C2", "C" & lastrow).Value = WorksheetFunction.Transpose(wellcols)
+
+        
+        'ActiveSheet.Range("A2", "A" & lastrow).Value = WorksheetFunction.Transpose(ID)
+        'Destination.Resize(UBound(varRecords, 2) + 1, UBound(varRecords, 1) + 1) = Application.Transpose(varRecords)
+        ID2 = TransposeArray(ID)
+        wellrows2 = TransposeArray(wellrows)
+        wellcols2 = TransposeArray(wellcols)
+        
+        ActiveSheet.Range("A2", "A" & lastrow).Value = ID2
+        ActiveSheet.Range("B2", "B" & lastrow).Value = wellrows2
+        ActiveSheet.Range("C2", "C" & lastrow).Value = wellcols2
+'        MsgBox (lastrow)
+
+'        MsgBox (UBound(ID))
+'        ActiveSheet.Range("B2", "B" & lastrow).Value = WorksheetFunction.Transpose(wellrows)
+'        ActiveSheet.Range("C2", "C" & lastrow).Value = WorksheetFunction.Transpose(wellcols)
 
 
         
@@ -1143,6 +1168,7 @@ Case "96 plader"
         .InsertLines LineNum, "Elseif cells(y,1).value < " & (sortedelevatorinfo(x)(0)) & " then cells(y,8).value = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
         LineNum = LineNum + 1
         Next x
+        '.InsertLines LineNum, "Else Cells(y,1).Value = " & Cells(y, 1).Value + DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
         .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
         LineNum = LineNum + 1
         .InsertLines LineNum, "end if"
