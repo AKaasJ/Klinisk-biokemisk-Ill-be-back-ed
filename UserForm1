@@ -626,7 +626,7 @@ Function elevatorposogmaxIDallefiler(Path)
 Dim MyFile As String 'Navn på fil (ændres senere)
 Dim elevatorpos()
 Dim elenrogmaxID(1)
-Dim maxID() As Integer
+Dim maxID() As Long
 Dim elevatoroversigt()
 Dim finalarray()
 
@@ -685,9 +685,11 @@ Do While MyFile <> ""
                 'split ID
                 
                 If Not Cells(elevatorrow + y + 1, elevatorcolumn + 1).Value = "" Then
-        
+                
                     ID = Split(Cells(elevatorrow + y + 1, elevatorcolumn + 1).Value, "-")
                     maxID(y) = CLng(ID(1))
+                    
+                    
                     
                     
                 End If
