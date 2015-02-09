@@ -629,6 +629,9 @@ Dim elenrogmaxID(1)
 Dim maxID() As Integer
 Dim elevatoroversigt()
 Dim finalarray()
+
+
+
 'Dim sortedarray()
 
 MyFile = Dir(Path & "\" & "*.xls?")
@@ -684,7 +687,7 @@ Do While MyFile <> ""
                 If Not Cells(elevatorrow + y + 1, elevatorcolumn + 1).Value = "" Then
         
                     ID = Split(Cells(elevatorrow + y + 1, elevatorcolumn + 1).Value, "-")
-                    maxID(y) = CInt(ID(1))
+                    maxID(y) = CLng(ID(1))
                     
                     
                 End If
