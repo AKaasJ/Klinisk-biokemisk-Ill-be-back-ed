@@ -1,0 +1,58 @@
+Sub tal()
+Dim arr(140064)
+Dim elevatorarr(140064)
+Dim elevatorval(1459)
+
+'Danner ID værdier
+For i = 1 To 140064
+    arr(i) = i
+Next i
+
+'indsætter overskrifter
+Cells(1, 1).Value = "ID"
+Cells(1, 2).Value = "Elevator"
+
+'indsætter 1400xx værdier
+Range("A2", "A140065").Value = TransposeArray(arr)
+
+'laver fake elevator array med værdier
+For i = 0 To 1459
+    elevatorval(i) = i * 96
+Next i
+
+'looper igennem alle ID værdier
+For i = LBound(arr) To UBound(arr)
+y = 0
+    'looper igennem alle elevatorer
+    For y = 0 To 1459
+        'laver et nyt array med elevator værdier.
+        If arr(i) >= elevatorval(y + 0) And arr(i) <= elevatorval(y + 1) Then
+            elevatorarr(i) = y
+            Exit For
+        End If
+        
+    
+    Next y
+
+Next i
+'indsætter elevatorværdier. (dog ca. 27 sek at køre på 140.000 værdier derhjemme)
+
+MsgBox (Timer - Start & " Seconds")
+End Sub
+
+
+
+Function TransposeArray(arr As Variant)
+'Dim arr As Variant
+Dim i As Long
+
+nr = UBound(arr)
+ReDim arr2(1 To nr, 1 To 1)
+ 
+    For i = 1 To nr
+    arr2(i, 1) = arr(i)
+    Next i
+ 
+TransposeArray = arr2
+End Function
+
