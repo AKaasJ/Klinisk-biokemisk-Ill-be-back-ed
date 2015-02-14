@@ -625,8 +625,9 @@ End Function
 Function elevatorposogmaxIDallefiler(Path)
 Dim MyFile As String 'Navn på fil (ændres senere)
 Dim elevatorpos()
-Dim elenrogmaxID(1)
+Dim elenrogmaxID(2)
 Dim maxID() As Long
+Dim minID() As Long
 Dim elevatoroversigt()
 Dim finalarray()
 
@@ -682,12 +683,14 @@ Do While MyFile <> ""
             y = 0
             Do Until Cells(elevatorrow + y + 1, elevatorcolumn + 1) = ""
                 ReDim Preserve maxID(y)
+                ReDim Preserve minID(y)
                 'split ID
                 
                 If Not Cells(elevatorrow + y + 1, elevatorcolumn + 1).Value = "" Then
                 
                     ID = Split(Cells(elevatorrow + y + 1, elevatorcolumn + 1).Value, "-")
                     maxID(y) = CLng(ID(1))
+                    minID(y) = CLng(ID(0))
                     
                     
                     
@@ -702,6 +705,7 @@ Do While MyFile <> ""
             'laver et array der indeholder elevator ID og maxID
             elenrogmaxID(0) = mitsplit(1)
             elenrogmaxID(1) = maxID()
+            elenrogmaxID(2) = minID()
             finalarray(i) = elenrogmaxID()
             i = i + 1
         
@@ -1060,8 +1064,9 @@ Case "96 plader"
         'Laver et array for alle filer i én bestemt mappe (skal udbygges så elevatorer har en plads i sti arket.)
         elevatorinfo = elevatorposogmaxIDallefiler(elevatorarray(0)) 'bug i CAG
         Dim allemaxplateID() As Long
+        Dim alleminplateID() As Long
         Dim alleelevatorID()
-        Dim joinarr(1)
+        Dim joinarr(2)
         Dim Elevatorjoined()
 
 
@@ -1074,9 +1079,11 @@ Case "96 plader"
             
             For y = 0 To længde
                 ReDim Preserve allemaxplateID(i) 'resetter ved hver loop, y skal være noget andet
+                ReDim Preserve alleminplateID(i) 'resetter ved hver loop, y skal være noget andet
                 ReDim Preserve alleelevatorID(i)
                 alleelevatorID(i) = elevatorinfo(x)(0)
                 allemaxplateID(i) = elevatorinfo(x)(1)(y)
+                alleminplateID(i) = elevatorinfo(x)(2)(y)
                 
                 i = i + 1
             Next y
@@ -1088,6 +1095,7 @@ Case "96 plader"
             ReDim Preserve Elevatorjoined(x)
             joinarr(1) = alleelevatorID(x)
             joinarr(0) = allemaxplateID(x)
+            joinarr(2) = alleminplateID(x)
             Elevatorjoined(x) = joinarr
         Next x
         
@@ -1136,66 +1144,95 @@ Case "96 plader"
 '*************************** BUG ************************ SAMLETSÆTNING ER FOR LANG
 
 'DEBUG
-
-    'OPRETTER MODULET
-
-    Dim VBProj As VBIDE.VBProject
-    Dim VBComp As VBIDE.VBComponent
-
-    Set VBProj = ThisWorkbook.VBProject
-    Set VBComp = VBProj.VBComponents.Add(vbext_ct_StdModule)
-    VBComp.Name = "NewModule2"
-    
-    Dim CodeMod As VBIDE.CodeModule
-    Dim LineNum As Long
-    Const DQUOTE = """" ' one " character
-
-    Set VBProj = ThisWorkbook.VBProject
-    Set VBComp = VBProj.VBComponents("NewModule2")
-    Set CodeMod = VBComp.CodeModule
-
-    'GENERER SUBROUTINEN I MODULET
-
-    With CodeMod 'genererer kode til den subroutine modulet skal indeholde (if statement)
-                 'ideen er at subroutinen går alle rækker igennem og bestemmer deres elevatornr.
-        LineNum = .CountOfLines + 1
-        .InsertLines LineNum, "Public Sub SayHello()" 'skriver navnet på proceduren i modulet
-        LineNum = LineNum + 1 'itererer til næste linje (husk der skal et loop ind)
-        .InsertLines LineNum, "Application.ScreenUpdating = False"
-        LineNum = LineNum + 1
-        .InsertLines LineNum, "for y = 2  to " & lastrow 'indsætter den linje der skal lave loop inde i modulet
-        LineNum = LineNum + 1
-        .InsertLines LineNum, "if cells(y,1).value < " & (sortedelevatorinfo(0)(0)) & " then "
-        LineNum = LineNum + 1
-        .InsertLines LineNum, "Cells(y, 8).Value = " & (sortedelevatorinfo(0)(1)) 'indsætter den linje der skal lave loop inde i modulet"
-        LineNum = LineNum + 1
-        For x = LBound(sortedelevatorinfo) To UBound(sortedelevatorinfo)
-        .InsertLines LineNum, "Elseif cells(y,1).value < " & (sortedelevatorinfo(x)(0)) & " then cells(y,8).value = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
-        LineNum = LineNum + 1
-        Next x
-        '.InsertLines LineNum, "Else Cells(y,1).Value = " & Cells(y, 1).Value + DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
-        .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
-        LineNum = LineNum + 1
-        .InsertLines LineNum, "end if"
-        LineNum = LineNum + 1
-        .InsertLines LineNum, "next y" 'indsætter den linje der skal lave loop inde i modulet
-        LineNum = LineNum + 1
-        .InsertLines LineNum, "Application.ScreenUpdating = True"
-        LineNum = LineNum + 1
-        .InsertLines LineNum, "End Sub"
-    End With
-
-    'KØRER MODULET / SUBROUTINEN
-
-    Call runsnewmodule2
-
-    'SLETTER MODULET:
-
-    Set VBProj = ThisWorkbook.VBProject
-    Set VBComp = VBProj.VBComponents("NewModule2")
-    VBProj.VBComponents.Remove VBComp
-    
+'
+'    'OPRETTER MODULET
+'
+'    Dim VBProj As VBIDE.VBProject
+'    Dim VBComp As VBIDE.VBComponent
+'
+'    Set VBProj = ThisWorkbook.VBProject
+'    Set VBComp = VBProj.VBComponents.Add(vbext_ct_StdModule)
+'    VBComp.Name = "NewModule2"
+'
+'    Dim CodeMod As VBIDE.CodeModule
+'    Dim LineNum As Long
+'    Const DQUOTE = """" ' one " character
+'
+'    Set VBProj = ThisWorkbook.VBProject
+'    Set VBComp = VBProj.VBComponents("NewModule2")
+'    Set CodeMod = VBComp.CodeModule
+'
+'    'GENERER SUBROUTINEN I MODULET
+'
+'    With CodeMod 'genererer kode til den subroutine modulet skal indeholde (if statement)
+'                 'ideen er at subroutinen går alle rækker igennem og bestemmer deres elevatornr.
+'        LineNum = .CountOfLines + 1
+'        .InsertLines LineNum, "Public Sub SayHello()" 'skriver navnet på proceduren i modulet
+'        LineNum = LineNum + 1 'itererer til næste linje (husk der skal et loop ind)
+'        .InsertLines LineNum, "Application.ScreenUpdating = False"
+'        LineNum = LineNum + 1
+'        .InsertLines LineNum, "for y = 2  to " & lastrow 'indsætter den linje der skal lave loop inde i modulet
+'        LineNum = LineNum + 1
+'        .InsertLines LineNum, "if cells(y,1).value < " & (sortedelevatorinfo(0)(0)) & " then "
+'        LineNum = LineNum + 1
+'        .InsertLines LineNum, "Cells(y, 8).Value = " & (sortedelevatorinfo(0)(1)) 'indsætter den linje der skal lave loop inde i modulet"
+'        LineNum = LineNum + 1
+'        For x = LBound(sortedelevatorinfo) To UBound(sortedelevatorinfo)
+'        .InsertLines LineNum, "Elseif cells(y,1).value < " & (sortedelevatorinfo(x)(0)) & " then cells(y,8).value = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
+'        LineNum = LineNum + 1
+'        Next x
+'        '.InsertLines LineNum, "Else Cells(y,1).Value = " & Cells(y, 1).Value + DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
+'        .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
+'        LineNum = LineNum + 1
+'        .InsertLines LineNum, "end if"
+'        LineNum = LineNum + 1
+'        .InsertLines LineNum, "next y" 'indsætter den linje der skal lave loop inde i modulet
+'        LineNum = LineNum + 1
+'        .InsertLines LineNum, "Application.ScreenUpdating = True"
+'        LineNum = LineNum + 1
+'        .InsertLines LineNum, "End Sub"
+'    End With
+'
+'    'KØRER MODULET / SUBROUTINEN
+'
+'    Call runsnewmodule2
+'
+'    'SLETTER MODULET:
+'
+'    Set VBProj = ThisWorkbook.VBProject
+'    Set VBComp = VBProj.VBComponents("NewModule2")
+'    VBProj.VBComponents.Remove VBComp
+'
 'DEBUG
+
+
+'Dimensionerer elevatorarr (det array der skal indeholde elevatornumre) efter ID arayet
+Dim elevatorarr()
+ReDim elevatorarr(UBound(ID))
+
+    'looper igennem alle ID
+    For i = LBound(ID) To UBound(ID)
+        If ID(i) = "" Then
+            elevatorarr(i) = 0
+        Else
+            'looper igennem alle elevatorer
+            For y = 0 To UBound(sortedelevatorinfo)
+                'laver et nyt array med elevator værdier.
+    
+                
+                If ID(i) >= sortedelevatorinfo(y)(2) And ID(i) <= sortedelevatorinfo(y)(0) Then
+                    elevatorarr(i) = sortedelevatorinfo(y)(1)
+                    Exit For
+                End If
+    
+            Next y
+        End If
+    Next i
+    
+    ActiveSheet.Range("H2", "H" & lastrow).Value = TransposeArray(elevatorarr)
+    
+    
+
 
        ' MsgBox (UBound(fryserogmaxplate)) '=15 hos Øbus 3
         
