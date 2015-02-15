@@ -579,8 +579,10 @@ i = -1
     
     Loop
 
-If IsEmpty(Stier(UBound(Stier))) Then
-ReDim Preserve Stier(UBound(Stier) - 1)
+'If IsEmpty(Stier(UBound(Stier))) Then
+If UBound(Stier) > 0 Then
+ '   MsgBox (UBound(Stier))
+    ReDim Preserve Stier(UBound(Stier) - 1)
 End If
 
 
@@ -1030,259 +1032,272 @@ Case "96 plader"
         'Unødvendigt?
         Set targetWorksheet = Worksheets(2) 'sætter lig 2 fordi det nye sheet altid er nr 2
         'unødvendigt?
+    
+    
         
     'HENTER "INDHOLD" FRA FRYSEROVERSIGT
         indhold = læserindhold(populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\fryseroversigt.xlsx") 'array med alle de forskellige indhold skal nok også bruge sti
+    
+    'MANGLER ET CATCH SOM STOPPER HVIS populen IKKE FINDES I FRYSEROVERSIGTEN
+    
+   '     MsgBox UBound(indhold)
+        If UBound(indhold) > 0 Then
         
-    'HENTER FRYSER OG MAX PLATE INFORMATION OM POPULEN
         
-        For x = LBound(indhold) To (UBound(indhold))
-       ' MsgBox (indhold(x))
-            ReDim Preserve fryserogmaxplate(x)
+        'HENTER FRYSER OG MAX PLATE INFORMATION OM POPULEN
             
-            fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold(x), populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\fryseroversigt.xlsx")
-            'output er 1 dimension større
-            'fryserogmaxplate(x) er fryserogmaxplate af indhold x
-            'fryserogmaxplate(x)(y) er fryser og maxplate af indhold x række y
-            'fryserogmaxplate(x)(y)(z) er fryser og maxplate af indhold x række y hvor z er informationen om fryser og maxplate
-            'fryserogmaxplate(x)(y)(0)=frysernr for række y, indhold x. (1)=fryserposition, (2)=maxplateID (det højeste plade ID der findes i den fryser)
-            
-        Next x
-        
-    'SKRIVER OVERSKRIFTER IND TIL DEN INFORMATION DER HENTES FRA FRYSEROVERSIGTEN
-        
-        For x = LBound(indhold) To UBound(indhold)
-            Cells(1, 9 + (x * 3)).Value = "Frysernr"
-            Cells(1, 10 + (x * 3)).Value = "Fryserposition"
-            Cells(1, 11 + (x * 3)).Value = "Indhold"
-        Next x
-        
-    'FINDER UD AF HVILKE ELEVATORNUMRE DER FINDES I POPULEN
-        
-        elevatorarray = stierfunction("Elevator", KolonneDerTestes)
-        
-        'Laver et array for alle filer i én bestemt mappe (skal udbygges så elevatorer har en plads i sti arket.)
-        elevatorinfo = elevatorposogmaxIDallefiler(elevatorarray(0)) 'bug i CAG
-        Dim allemaxplateID() As Long
-        Dim alleminplateID() As Long
-        Dim alleelevatorID()
-        Dim joinarr(2)
-        Dim Elevatorjoined()
-
-
-        'laver elevatorinfo om til 2 arrays, et med elevatorID og et med maxplateID, laves for at fjerne 1 dimension
-        i = 0
-        
-        For x = LBound(elevatorinfo) To UBound(elevatorinfo)
-
-            længde = UBound(elevatorinfo(x)(1))
-            
-            For y = 0 To længde
-                ReDim Preserve allemaxplateID(i) 'resetter ved hver loop, y skal være noget andet
-                ReDim Preserve alleminplateID(i) 'resetter ved hver loop, y skal være noget andet
-                ReDim Preserve alleelevatorID(i)
-                alleelevatorID(i) = elevatorinfo(x)(0)
-                allemaxplateID(i) = elevatorinfo(x)(1)(y)
-                alleminplateID(i) = elevatorinfo(x)(2)(y)
+            For x = LBound(indhold) To (UBound(indhold))
+           ' MsgBox (indhold(x))
+                ReDim Preserve fryserogmaxplate(x)
                 
-                i = i + 1
-            Next y
-        
-        Next x
-        
-        'samler arrays
-        For x = LBound(alleelevatorID) To UBound(alleelevatorID)
-            ReDim Preserve Elevatorjoined(x)
-            joinarr(1) = alleelevatorID(x)
-            joinarr(0) = allemaxplateID(x)
-            joinarr(2) = alleminplateID(x)
-            Elevatorjoined(x) = joinarr
-        Next x
-        
-        'Sorterer array
-        sortedelevatorinfo = InsertionSortElevator(Elevatorjoined)
-        
-        
-        
-        'finder sidste rækker i dokumentet
-        'lastrow = ActiveSheet.UsedRange.Rows.Count
-
-        x = 0
-
-            
-        
-        samletsætning = "="
-        slutparantes = ""
-            
-            'Cells(2, 8).Value2 = samletsætning
-            
-        For x = LBound(sortedelevatorinfo) To UBound(sortedelevatorinfo) - 1
+                fryserogmaxplate(x) = hentallerækkerogmaxplate(indhold(x), populnummer, "P:\Klinisk Biokemisk Afdeling K\DNA FORSKNINGSGRUPPEN\DNA-oprensning\Biobank overblik testmappe\fryseroversigt.xlsx")
+                'output er 1 dimension større
+                'fryserogmaxplate(x) er fryserogmaxplate af indhold x
+                'fryserogmaxplate(x)(y) er fryser og maxplate af indhold x række y
+                'fryserogmaxplate(x)(y)(z) er fryser og maxplate af indhold x række y hvor z er informationen om fryser og maxplate
+                'fryserogmaxplate(x)(y)(0)=frysernr for række y, indhold x. (1)=fryserposition, (2)=maxplateID (det højeste plade ID der findes i den fryser)
                 
-                'MsgBox (sortedelevatorinfo(65)(0))
+            Next x
+            
+        'SKRIVER OVERSKRIFTER IND TIL DEN INFORMATION DER HENTES FRA FRYSEROVERSIGTEN
+            
+            For x = LBound(indhold) To UBound(indhold)
+                Cells(1, 9 + (x * 3)).Value = "Frysernr"
+                Cells(1, 10 + (x * 3)).Value = "Fryserposition"
+                Cells(1, 11 + (x * 3)).Value = "Indhold"
+            Next x
+            
+        'FINDER UD AF HVILKE ELEVATORNUMRE DER FINDES I POPULEN
+            
+            elevatorarray = stierfunction("Elevator", KolonneDerTestes)
+            
+            'Laver et array for alle filer i én bestemt mappe (skal udbygges så elevatorer har en plads i sti arket.)
+            elevatorinfo = elevatorposogmaxIDallefiler(elevatorarray(0)) 'bug i CAG
+            Dim allemaxplateID() As Long
+            Dim alleminplateID() As Long
+            Dim alleelevatorID()
+            Dim joinarr(2)
+            Dim Elevatorjoined()
+    
+            
+    
+            'laver elevatorinfo om til 2 arrays, et med elevatorID og et med maxplateID, laves for at fjerne 1 dimension
+            i = 0
+            
+            For x = LBound(elevatorinfo) To UBound(elevatorinfo)
+    
+                længde = UBound(elevatorinfo(x)(1))
                 
-            ifsætning = "IF(RC[-7]<" & sortedelevatorinfo(x)(0) & "," & sortedelevatorinfo(x)(1) & ","
-
-            samletsætning = (samletsætning & ifsætning)
-
-            slutparantes = slutparantes & ")"
-                'MsgBox (samletsætning & """ID værdi findes ikke i elevatorfiler""" & slutparantes)
-                    'Range("H2:H193").Value2 = samletsætning & """ID værdi findes ikke i elevatorfiler""" & slutparantes
-            'max x er 66 ?65 (funktionen burde loope 66 gange (indsætte 66 paranteser)
-            'min funktion stopper med at indsætte ved 65
-            'Ubound(sortedelevatorinfo er 65)
+                For y = 0 To længde
+                    ReDim Preserve allemaxplateID(i) 'resetter ved hver loop, y skal være noget andet
+                    ReDim Preserve alleminplateID(i) 'resetter ved hver loop, y skal være noget andet
+                    ReDim Preserve alleelevatorID(i)
+                    alleelevatorID(i) = elevatorinfo(x)(0)
+                    allemaxplateID(i) = elevatorinfo(x)(1)(y)
+                    alleminplateID(i) = elevatorinfo(x)(2)(y)
+                    
+                    i = i + 1
+                Next y
+            
+            Next x
+            
+            'samler arrays
+            For x = LBound(alleelevatorID) To UBound(alleelevatorID)
+                ReDim Preserve Elevatorjoined(x)
+                joinarr(1) = alleelevatorID(x)
+                joinarr(0) = allemaxplateID(x)
+                joinarr(2) = alleminplateID(x)
+                Elevatorjoined(x) = joinarr
+            Next x
+            
+            'Sorterer array
+            sortedelevatorinfo = InsertionSortElevator(Elevatorjoined)
             
             
-        Next x
+            
+            'finder sidste rækker i dokumentet
+            'lastrow = ActiveSheet.UsedRange.Rows.Count
+    
+            x = 0
+    
+                
+            
+            samletsætning = "="
+            slutparantes = ""
+                
+                'Cells(2, 8).Value2 = samletsætning
+                
+            For x = LBound(sortedelevatorinfo) To UBound(sortedelevatorinfo) - 1
+                    
+                    'MsgBox (sortedelevatorinfo(65)(0))
+                    
+                ifsætning = "IF(RC[-7]<" & sortedelevatorinfo(x)(0) & "," & sortedelevatorinfo(x)(1) & ","
+    
+                samletsætning = (samletsætning & ifsætning)
+    
+                slutparantes = slutparantes & ")"
+                    'MsgBox (samletsætning & """ID værdi findes ikke i elevatorfiler""" & slutparantes)
+                        'Range("H2:H193").Value2 = samletsætning & """ID værdi findes ikke i elevatorfiler""" & slutparantes
+                'max x er 66 ?65 (funktionen burde loope 66 gange (indsætte 66 paranteser)
+                'min funktion stopper med at indsætte ved 65
+                'Ubound(sortedelevatorinfo er 65)
+                
+                
+            Next x
+            
+            'samletsætning er det fulde if-statement
+            samletsætning = samletsætning & """ID værdi findes ikke i elevatorfiler""" & slutparantes
+    '        MsgBox (samletsætning)
+    '*************************** BUG ************************ SAMLETSÆTNING ER FOR LANG
+            'indsætter elevatornr if statement (samletsætning)
+    '        Range("H2:H" & lastrow).Value2 = samletsætning
+       '     MsgBox (slutparantes)
+    '*************************** BUG ************************ SAMLETSÆTNING ER FOR LANG
+    
+    'DEBUG
+    '
+    '    'OPRETTER MODULET
+    '
+    '    Dim VBProj As VBIDE.VBProject
+    '    Dim VBComp As VBIDE.VBComponent
+    '
+    '    Set VBProj = ThisWorkbook.VBProject
+    '    Set VBComp = VBProj.VBComponents.Add(vbext_ct_StdModule)
+    '    VBComp.Name = "NewModule2"
+    '
+    '    Dim CodeMod As VBIDE.CodeModule
+    '    Dim LineNum As Long
+    '    Const DQUOTE = """" ' one " character
+    '
+    '    Set VBProj = ThisWorkbook.VBProject
+    '    Set VBComp = VBProj.VBComponents("NewModule2")
+    '    Set CodeMod = VBComp.CodeModule
+    '
+    '    'GENERER SUBROUTINEN I MODULET
+    '
+    '    With CodeMod 'genererer kode til den subroutine modulet skal indeholde (if statement)
+    '                 'ideen er at subroutinen går alle rækker igennem og bestemmer deres elevatornr.
+    '        LineNum = .CountOfLines + 1
+    '        .InsertLines LineNum, "Public Sub SayHello()" 'skriver navnet på proceduren i modulet
+    '        LineNum = LineNum + 1 'itererer til næste linje (husk der skal et loop ind)
+    '        .InsertLines LineNum, "Application.ScreenUpdating = False"
+    '        LineNum = LineNum + 1
+    '        .InsertLines LineNum, "for y = 2  to " & lastrow 'indsætter den linje der skal lave loop inde i modulet
+    '        LineNum = LineNum + 1
+    '        .InsertLines LineNum, "if cells(y,1).value < " & (sortedelevatorinfo(0)(0)) & " then "
+    '        LineNum = LineNum + 1
+    '        .InsertLines LineNum, "Cells(y, 8).Value = " & (sortedelevatorinfo(0)(1)) 'indsætter den linje der skal lave loop inde i modulet"
+    '        LineNum = LineNum + 1
+    '        For x = LBound(sortedelevatorinfo) To UBound(sortedelevatorinfo)
+    '        .InsertLines LineNum, "Elseif cells(y,1).value < " & (sortedelevatorinfo(x)(0)) & " then cells(y,8).value = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
+    '        LineNum = LineNum + 1
+    '        Next x
+    '        '.InsertLines LineNum, "Else Cells(y,1).Value = " & Cells(y, 1).Value + DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
+    '        .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
+    '        LineNum = LineNum + 1
+    '        .InsertLines LineNum, "end if"
+    '        LineNum = LineNum + 1
+    '        .InsertLines LineNum, "next y" 'indsætter den linje der skal lave loop inde i modulet
+    '        LineNum = LineNum + 1
+    '        .InsertLines LineNum, "Application.ScreenUpdating = True"
+    '        LineNum = LineNum + 1
+    '        .InsertLines LineNum, "End Sub"
+    '    End With
+    '
+    '    'KØRER MODULET / SUBROUTINEN
+    '
+    '    Call runsnewmodule2
+    '
+    '    'SLETTER MODULET:
+    '
+    '    Set VBProj = ThisWorkbook.VBProject
+    '    Set VBComp = VBProj.VBComponents("NewModule2")
+    '    VBProj.VBComponents.Remove VBComp
+    '
+    'DEBUG
+    
+    
+    'Dimensionerer elevatorarr (det array der skal indeholde elevatornumre) efter ID arayet
+    Dim elevatorarr()
+    ReDim elevatorarr(UBound(ID))
+    
+        'looper igennem alle ID
+        For i = LBound(ID) To UBound(ID)
+            If ID(i) = "" Then
+                elevatorarr(i) = 0
+            Else
+                'looper igennem alle elevatorer
+                For y = 0 To UBound(sortedelevatorinfo)
+                    'laver et nyt array med elevator værdier.
         
-        'samletsætning er det fulde if-statement
-        samletsætning = samletsætning & """ID værdi findes ikke i elevatorfiler""" & slutparantes
-'        MsgBox (samletsætning)
-'*************************** BUG ************************ SAMLETSÆTNING ER FOR LANG
-        'indsætter elevatornr if statement (samletsætning)
-'        Range("H2:H" & lastrow).Value2 = samletsætning
-   '     MsgBox (slutparantes)
-'*************************** BUG ************************ SAMLETSÆTNING ER FOR LANG
-
-'DEBUG
-'
-'    'OPRETTER MODULET
-'
-'    Dim VBProj As VBIDE.VBProject
-'    Dim VBComp As VBIDE.VBComponent
-'
-'    Set VBProj = ThisWorkbook.VBProject
-'    Set VBComp = VBProj.VBComponents.Add(vbext_ct_StdModule)
-'    VBComp.Name = "NewModule2"
-'
-'    Dim CodeMod As VBIDE.CodeModule
-'    Dim LineNum As Long
-'    Const DQUOTE = """" ' one " character
-'
-'    Set VBProj = ThisWorkbook.VBProject
-'    Set VBComp = VBProj.VBComponents("NewModule2")
-'    Set CodeMod = VBComp.CodeModule
-'
-'    'GENERER SUBROUTINEN I MODULET
-'
-'    With CodeMod 'genererer kode til den subroutine modulet skal indeholde (if statement)
-'                 'ideen er at subroutinen går alle rækker igennem og bestemmer deres elevatornr.
-'        LineNum = .CountOfLines + 1
-'        .InsertLines LineNum, "Public Sub SayHello()" 'skriver navnet på proceduren i modulet
-'        LineNum = LineNum + 1 'itererer til næste linje (husk der skal et loop ind)
-'        .InsertLines LineNum, "Application.ScreenUpdating = False"
-'        LineNum = LineNum + 1
-'        .InsertLines LineNum, "for y = 2  to " & lastrow 'indsætter den linje der skal lave loop inde i modulet
-'        LineNum = LineNum + 1
-'        .InsertLines LineNum, "if cells(y,1).value < " & (sortedelevatorinfo(0)(0)) & " then "
-'        LineNum = LineNum + 1
-'        .InsertLines LineNum, "Cells(y, 8).Value = " & (sortedelevatorinfo(0)(1)) 'indsætter den linje der skal lave loop inde i modulet"
-'        LineNum = LineNum + 1
-'        For x = LBound(sortedelevatorinfo) To UBound(sortedelevatorinfo)
-'        .InsertLines LineNum, "Elseif cells(y,1).value < " & (sortedelevatorinfo(x)(0)) & " then cells(y,8).value = " & (sortedelevatorinfo(x)(1)) 'indsætter den linje der skal lave loop inde i modulet
-'        LineNum = LineNum + 1
-'        Next x
-'        '.InsertLines LineNum, "Else Cells(y,1).Value = " & Cells(y, 1).Value + DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
-'        .InsertLines LineNum, "Else Cells(y,1).Value = " & DQUOTE & " findes ikke i elevatorfiler" & DQUOTE
-'        LineNum = LineNum + 1
-'        .InsertLines LineNum, "end if"
-'        LineNum = LineNum + 1
-'        .InsertLines LineNum, "next y" 'indsætter den linje der skal lave loop inde i modulet
-'        LineNum = LineNum + 1
-'        .InsertLines LineNum, "Application.ScreenUpdating = True"
-'        LineNum = LineNum + 1
-'        .InsertLines LineNum, "End Sub"
-'    End With
-'
-'    'KØRER MODULET / SUBROUTINEN
-'
-'    Call runsnewmodule2
-'
-'    'SLETTER MODULET:
-'
-'    Set VBProj = ThisWorkbook.VBProject
-'    Set VBComp = VBProj.VBComponents("NewModule2")
-'    VBProj.VBComponents.Remove VBComp
-'
-'DEBUG
-
-
-'Dimensionerer elevatorarr (det array der skal indeholde elevatornumre) efter ID arayet
-Dim elevatorarr()
-ReDim elevatorarr(UBound(ID))
-
-    'looper igennem alle ID
-    For i = LBound(ID) To UBound(ID)
-        If ID(i) = "" Then
-            elevatorarr(i) = 0
+                    
+                    If ID(i) >= sortedelevatorinfo(y)(2) And ID(i) <= sortedelevatorinfo(y)(0) Then
+                        elevatorarr(i) = sortedelevatorinfo(y)(1)
+                        Exit For
+                    End If
+        
+                Next y
+            End If
+        Next i
+        
+        ActiveSheet.Range("H2", "H" & lastrow).Value = TransposeArray(elevatorarr)
+        
+        
+    
+    
+           ' MsgBox (UBound(fryserogmaxplate)) '=15 hos Øbus 3
+            
+            For x = LBound(fryserogmaxplate) To UBound(fryserogmaxplate)
+            
+            
+            
+                samletfryserpos = "="
+                samletfrysernr = "="
+                sluttest = ""
+            
+                For y = LBound(fryserogmaxplate(x)) To UBound(fryserogmaxplate(x))
+                    
+                    'iffrysernr laver if-statement der bestemmer hvilket frysernr tilhører hvilkene elevator.
+                    iffrysernr = "IF(AND(" & fryserogmaxplate(x)(y)(2) & ">=RC[" & -1 - (3 * x) & "]," & fryserogmaxplate(x)(y)(3) & "<=RC[" & -1 - (3 * x) & "])," & fryserogmaxplate(x)(y)(0) & ","
+                    
+                    samletfrysernr = (samletfrysernr & iffrysernr)
+                    
+                    sluttest = sluttest & ")"
+                    
+                    'iffryserpos laver if-statement der bestemmer hvilken fryserposition tilhører hvilkene elevator.
+                    iffryserpos = "IF(AND(" & fryserogmaxplate(x)(y)(2) & ">=RC[" & -2 - (3 * x) & "]," & fryserogmaxplate(x)(y)(3) & "<=RC[" & -2 - (3 * x) & "]),""" & fryserogmaxplate(x)(y)(1) & ""","
+            
+                    samletfryserpos = (samletfryserpos & iffryserpos)
+            
+                
+                Next y
+                'tilføj sidste række til if sætning
+                samletfrysernr = samletfrysernr & """N/A""" & sluttest
+                samletfryserpos = samletfryserpos & """N/A""" & sluttest
+            
+                'indsætter tekst i alle rækker / kolonner (for alt "indhold")
+                Range(Cells(2, 9 + (3 * x)), Cells(lastrow, 9 + (3 * x))).Value2 = samletfrysernr
+                Range(Cells(2, 10 + (3 * x)), Cells(lastrow, 10 + (3 * x))).Value2 = samletfryserpos
+                Range(Cells(2, 11 + (3 * x)), Cells(lastrow, 11 + (3 * x))).Value2 = indhold(x)
+            
+       '     MsgBox ("kommr vi så langt?") 'kører kun 2 gange
+                
+            Next x
+            
+            overskrifter = Array("ID", "Well", "Well", "Fil", "PlateID", "Isolationstid", "Instrument", "Elevatornr")
+            Range(Cells(1, 1), Cells(1, 8)).Value = overskrifter
+    
+    '        Cells(1, 1).Value = "ID"
+    '        Cells(1, 2).Value = "Well"
+    '        Cells(1, 4).Value = "Fil"
+    '        Cells(1, 5).Value = "PlateID"
+    '        Cells(1, 6).Value = "Isolationstid"
+    '        Cells(1, 7).Value = "Instrument"
+    '        Cells(1, 8).Value = "Elevatornr"
+            
         Else
-            'looper igennem alle elevatorer
-            For y = 0 To UBound(sortedelevatorinfo)
-                'laver et nyt array med elevator værdier.
-    
-                
-                If ID(i) >= sortedelevatorinfo(y)(2) And ID(i) <= sortedelevatorinfo(y)(0) Then
-                    elevatorarr(i) = sortedelevatorinfo(y)(1)
-                    Exit For
-                End If
-    
-            Next y
+            MsgBox ("Denne population findes ikke i fryseroversigten")
         End If
-    Next i
-    
-    ActiveSheet.Range("H2", "H" & lastrow).Value = TransposeArray(elevatorarr)
-    
-    
-
-
-       ' MsgBox (UBound(fryserogmaxplate)) '=15 hos Øbus 3
-        
-        For x = LBound(fryserogmaxplate) To UBound(fryserogmaxplate)
-        
-        
-        
-            samletfryserpos = "="
-            samletfrysernr = "="
-            sluttest = ""
-        
-            For y = LBound(fryserogmaxplate(x)) To UBound(fryserogmaxplate(x))
-                
-                'iffrysernr laver if-statement der bestemmer hvilket frysernr tilhører hvilkene elevator.
-                iffrysernr = "IF(AND(" & fryserogmaxplate(x)(y)(2) & ">=RC[" & -1 - (3 * x) & "]," & fryserogmaxplate(x)(y)(3) & "<=RC[" & -1 - (3 * x) & "])," & fryserogmaxplate(x)(y)(0) & ","
-                
-                samletfrysernr = (samletfrysernr & iffrysernr)
-                
-                sluttest = sluttest & ")"
-                
-                'iffryserpos laver if-statement der bestemmer hvilken fryserposition tilhører hvilkene elevator.
-                iffryserpos = "IF(AND(" & fryserogmaxplate(x)(y)(2) & ">=RC[" & -2 - (3 * x) & "]," & fryserogmaxplate(x)(y)(3) & "<=RC[" & -2 - (3 * x) & "]),""" & fryserogmaxplate(x)(y)(1) & ""","
-        
-                samletfryserpos = (samletfryserpos & iffryserpos)
-        
-            
-            Next y
-            'tilføj sidste række til if sætning
-            samletfrysernr = samletfrysernr & """N/A""" & sluttest
-            samletfryserpos = samletfryserpos & """N/A""" & sluttest
-        
-            'indsætter tekst i alle rækker / kolonner (for alt "indhold")
-            Range(Cells(2, 9 + (3 * x)), Cells(lastrow, 9 + (3 * x))).Value2 = samletfrysernr
-            Range(Cells(2, 10 + (3 * x)), Cells(lastrow, 10 + (3 * x))).Value2 = samletfryserpos
-            Range(Cells(2, 11 + (3 * x)), Cells(lastrow, 11 + (3 * x))).Value2 = indhold(x)
-        
-   '     MsgBox ("kommr vi så langt?") 'kører kun 2 gange
-            
-        Next x
-        
-        overskrifter = Array("ID", "Well", "Well", "Fil", "PlateID", "Isolationstid", "Instrument", "Elevatornr")
-        Range(Cells(1, 1), Cells(1, 8)).Value = overskrifter
-
-'        Cells(1, 1).Value = "ID"
-'        Cells(1, 2).Value = "Well"
-'        Cells(1, 4).Value = "Fil"
-'        Cells(1, 5).Value = "PlateID"
-'        Cells(1, 6).Value = "Isolationstid"
-'        Cells(1, 7).Value = "Instrument"
-'        Cells(1, 8).Value = "Elevatornr"
         
     End If
  
@@ -1641,8 +1656,9 @@ i = i + 1
 Loop
  
 'fjerne det sidste element hvis det er tomt (bug i loopet) laver Redim med x=x+1 en gang for meget
-If IsEmpty(array2(UBound(array2))) Then 'nyt
-            
+'If IsEmpty(array2(UBound(array2))) Then 'nyt
+If UBound(array2) > 0 Then
+
     ReDim Preserve array2(LBound(array2) To UBound(array2) - 1) 'nyt
                      
 End If 'nyt
@@ -1705,12 +1721,20 @@ Do While Cells(i + 1, 4).Value <> "" 'så længe fryserpos ikke er tom
 
     
 i = i + 1
+'DEBUG
+
+
 
 Loop
 'MsgBox ((UBound(array2)))
 'MsgBox (IsEmpty(array2(UBound(array2))))
-If IsEmpty(array2(UBound(array2))) Then
-            
+'If IsEmpty(array2(UBound(array2))) Then
+If UBound(array2) > 0 Then
+'    MsgBox (UBound(array2))
+'    MsgBox (IsEmpty(array2(UBound(array2))))
+    
+    
+    
     ReDim Preserve array2(LBound(array2) To UBound(array2) - 1)
                      
 End If
@@ -1784,8 +1808,3 @@ End Sub
 Private Sub Label2_Click()
 
 End Sub
-
-
-
-
-
